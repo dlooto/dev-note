@@ -1,0 +1,180 @@
+
+===CSS选择器
+1.	* 	通用元素选择器，匹配任何元素
+2.	E	标签选择器，匹配所有使用E标签的元素
+3.	.info	class选择器，匹配所有class属性中包含info的元素
+4. 	#footer 	id选择器，匹配所有id属性等于footer的元素
+
+史俊2012-06-07 13:30:11
+    你用高级选择器 
+
+Dlooto2012-06-07 13:30:16
+    用哪个？
+
+史俊2012-06-07 13:30:28
+    .page h4 span .left-all {} 
+
+史俊2012-06-07 13:31:10
+    要么你就给 .left-all 加上 !important 
+
+
+===<a 标签点击后停留在页面原来的位置
+<a href="###"></a>
+
+--失去焦点时执行packup()
+<textarea id="replyContent_{{comment.id}}" onblur="packup('{{comment.id}}')" rows="5" cols="80"></textarea>
+
+$("#reply-div_"+cid).toggle("slow");  －－－－弹出与收起切换
+
+===$("#ssss").append(html)
+append和prepend
+相同点：都可以在本标签内进行html内容的插入
+不同点：append把html的内容插到本标签的尾部，而prepend则把内容插入到本标签的头部
+
+<a onclick=”doclick();”  target=”_blank”  href=”javascript: dosomething();” > </a>
+
+=====
+<IMG alt=这里可以添加想显示的文字 src="图片地址" border=0>   ---图片鼠标放上显示文字
+<a href="{% url ones_home fan.id %}" title="{{fan.name}}"> 显示文字</a>  －－鼠标放上链接显示文字
+
+<p style="width: 5em; overflow: hidden; text-overflow: ellipsis">
+<nobr>这句话只能显示10个字符</nobr>
+</p>
+
+添加样式：
+<p class="diaryitem-limit"><nobr>{{ diary.content|urlize }}</nobr></p> 
+    －－－为何不行？
+
+<!--<script src="{{ STATIC_URL }}/js/jquery.ellipsis.js"></script>-->
+
+// 离开当前页面时触发的动作，需设置setMark()来触发
+/*
+submitted = false;
+window.onbeforeunload = function() {
+	if(!submitted) {
+		title = $("#blog-title").val().trim();		
+		content = $("#blog-content").val().trim();//日记正文，存入session,只有当真正点击保存草稿才存入DB
+		if(content != '') {
+			$.post("/diary/save2session/", 
+				{"title": title, "content": content, } 
+				);//不需保证一定能正确存入				
+		} 	
+    }
+}
+*/
+
+＝＝＝＝＝＝HTML转义符
+显示 	说明 	实体名称 	实体编号
+
+	半方大的空白 	&ensp; 	&#8194;
+
+	全方大的空白 	&emsp; 	&#8195;
+
+	不断行的空白格 	&nbsp; 	&#160;
+< 	小于 	&lt; 	&#60;
+> 	大于 	&gt; 	&#62;
+& 	&符号 	&amp; 	&#38;
+" 	双引号 	&quot; 	&#34;
+? 	版权 	&copy; 	&#169;
+? 	已注册商标 	&reg; 	&#174;
+? 	商标（美国） 	? 	&#8482;
+× 	乘号 	&times; 	&#215;
+÷ 	除号 	&divide; 	&#247;
+
+
+点击链接触发post請求：
+doPost里写 $（“form”）.submit(); 
+
+
+.page h3 {
+    float: left;  /*左对齐*/
+    font-size: 14px;
+    font-weight: bold;   ---加粗
+}
+
+.section strong {   /* by jun*/
+    float: left;
+    font-size: 12px;
+    font-weight: bold;
+    padding-right: 10px;   /*与右边元素的距离，反之padding-left为与左边元素的距离*/
+}
+
+a:visited {
+    /*color: #1B325F;*/   /* commented by jun*/   －－－－被注释了，点击链接后不会变颜色
+}
+
+a, a:link, a:visited {
+    text-decoration: none;
+    outline: none;
+    color: #aa3535; /*#aa3535--red  , #3A89C9--小清新*/  －－－－被改成红色，老狸未来若要求，可改回小清新
+}
+
+======换行
+word-wrap:break-word;
+word-break:break-all; 
+ 限定dd的宽度 否则你就会看到dd无限宽，这样如果超出了父窗口的宽度就会换行的 
+
+
+-----淡红色（作为操作成功消息）
+FFD2D2
+FFECEC
+F2E6E6
+FFE6D9
+FFF3EE
+
+#90bf40  －－－低碳环保绿
+
+<a class="gui-screen-top" href="#"><s></s><b></b>返回顶部</a>
+
+=====该网站不错的颜色
+http://hi.baidu.com/microji/item/971df90f0b5ecd24a1312d03
+
+date.js用法
+http://www.datejs.com/2007/11/27/getting-started-with-datejs/
+
+<span id="diary-date"></span></p>
+<script>
+$("#diary-date").html(manDate(Date.now(), '{{ detailDiary.created_date|date:"Y-m-d H:i:s" }}'));
+</script>
+
+<script>alert(Date.now().toString('yyyy年M月d日 H:m'));</script>
+
+    
+function grayInputText(inputObj) {
+    var defVal = inputObj.val();
+
+    inputObj.bind({
+        focus: function() {
+            var _this = $(this);
+            if (_this.val() == defVal) {
+                _this.val('');
+            } else {
+                inputObj.css("color", "#000");
+            }
+        },
+        blur: function() {
+            var _this = $(this);
+            if (_this.val() == '') {
+                _this.val(defVal);
+                //_this.css("col");
+            }
+        },
+        change: function() {
+            alert('Handler for .change() called.');
+        }
+    });
+}
+
+========widget
+{% load widget_tweaks %}
+
+<!-- add 2 extra css classes to field element -->
+{{ form.title|add_class:"css_class_1 css_class_2" }}
+
+{{ form.text|attr:"rows:20"|attr:"cols:20"|attr:"title:Hello, world!" }}
+
+
+能确保不出错可用:
+$("#tag-items").load("{% url tags_get profile %}?page="+pageNo);
+
+

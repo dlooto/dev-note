@@ -1,0 +1,52 @@
+
+=== python学习步骤：
+1. 安装ubuntu最新版本，了解简单linux命令，掌握python终端解释器用法
+2. 了解int, string数据类型用法与操作. 
+3. 熟练掌握元组,列表, 字典等基础数据结构
+4. 掌握python import原理与语法
+5. 掌握python面向对象语法：类定义，对象构造，__init__,继承语法
+6. 掌握python基础编程规范
+7. 了解*args, **kwargs语法特性
+
+=== django学习步骤：
+1. MTV基础原理与技术框架了解
+2. <django_book>阅读：1, 2, 3, 4, 5, 7, 8, 9, 10, 11(quick), 12(optional), 14, 15(future)
+    20-30 pages/day
+3. 试用功能，了解主体需求，熟悉主要数据model
+4. 阅读项目源码，小功能实战
+
+=== 开发环境搭建(详细参见文档《django-startup》--python install and quick start
+1.Install ubuntu(linux), python2.4+
+2.setup ubuntu env: source.list, 中文及输入法，
+3.Install MySQL(建库，解决MySQL中文问题)
+    注：sudo apt-get install libmysqlclient-dev  --安装mysql后应把这个同时装上，解决mysql_config not found问题
+4.install virtualenv(and setup)
+5.Install Pinax/Django/PIL --通过requirements.txt文件下载安装所有包
+    注：PIL单独安装，遵循deploy中部署
+        python-dev build-essential  --安装mysql-python error时，安装此解决
+6.Install Aptana（install jdk, Aptana,工程创建，配置）
+7.run server and test 
+8.Install hg(版本控制)
+9. 常用命令使用:
+    shell/vi
+    django:syncdb, runserver, sqlall, test
+    hg: clone/pull/update/status/add/ci/push
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

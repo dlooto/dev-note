@@ -1,0 +1,393 @@
+
+======models
+
+======模型设计models
+
+User(用户鉴权实体模型)
+
+    id      : 用于唯一标识实体.无实际业务意义
+    username: 用户名(初始存email值）
+    email
+    password
+    date_joined:    注册时间
+    last_login:     最后登录时间
+    is_staff:  
+    is_superuser:   是否管理账号
+    is_active:      账号是否激活 0-未激活 1-已激活
+    groups:
+    user_permissions:
+    
+
+192.168.1.114目前安装的服务
+1. Scrumworks   敏捷项目管理
+2. Jira         代码bug管理
+3. Stash        代码管理
+4. Conflunce    文档管理
+5. MySQL         
+6. git
+7. gitolite
+8. Apache
+9. Nginx
+10.Jinkins
+11.ftp
+12.  
+
+    
+========new features
+活动标签                                --  done, can add tags in model                               
+基于城市/区/时间段(今天/周末)查询活动    --  done model basicly  
+根据标签(tag)查询活动                   --  done
+添加memcached功能                       --  done
+按发布时间/人气/价格排序                 -- done
+初始化全局数据(city,area,tag等)          -- done       
+评论/回复                                -- done
+分页                                     -- done partly, views and templates not completed , 
+
+注册时需要昵称                 --done,tom
+个人主页名称                   --done,tom
+主办方(organizer)              --done,tom
+重置密码/注册邮件发送限制次数   --tom
+
+========TODOs
+initGlobalData() not in correct place
+活动日程(schedule)
+图片存储(MangoDB?)
+
+===Long Planing Tasks:
+Python/Django/views设计优化与最佳实践    --Junn
+Django Model查询优化                    --Junn
+Nginx/Gunicorn配置部署研究              --TOM
+NoSQL: Memcached/Redis/MongoDB
+MySQL数据备份与安全
+Django-xxx开源解决方案关注与研究
+
+== Next todos ==
+===1. activity:===
+*创建与修改活动基本资料(不包括添加标签,图片等)
+*为活动添加标签
+*上传/剪切活动海报
+*查看活动详情(显示标签/海报/地图等)
+*添加评论及回复
+*置顶评论
+*分页显示评论(并置顶的评论)列表
+*参加与关注(感兴趣)活动/取消参加与取消关注
+ 
+*按城市/区域/时间段/标签查找活动
+*按活动标题/详情内keywords查找活动(基于特定城市)
+
+
+*活动列表:参加/发布/感兴趣
+*对活动列表进行分页                       ---tom
+
+===2. profile ===
+*个人信息设置(含标签)
+*设置头像    
+*个人信息显示(名片)
+*换一组标签                              ---undo
+
+===3. account===
+*注册(带昵称)
+*登录(带验证码)
+*密码重置
+*修改密码                    
+*邮件队列发送                            ---danny
+
+===4. social===
+*对Ta进行关注/取消关注                   ---undo
+*显示'Ta关注的人'列表                    ---undo, if we need?
+*显示'关注Ta的人'列表                    ---undo
+*显示用户对一批人的关注状态(已关注/未关注)---undo
+    
+===5. entryform(报名表)===
+*创建活动时添加报名表(空的花名册)
+*参加者填写报名表(填写后不允许修改)
+*查看活动参加者花名册
+*删除报名表(花名册)
+*活动发布者可以定制报名表  ---undo
+
+
+Sprint 丑小鸭第2季:
+估算:
+迭代时间：
+ 2013.1.7-2013.1.18 (其中1.12, 1.13为周末休息)
+ 计划完成工作量
+      总故事(功能)数:     14 个     总故事点数:               80
+      总任务数:               55个      任务总估算时间 ： 137 hrs(以小时计)
+
+   故事及任务详见: http://192.168.1.114:8180/scrumworks/taskboard
+
+Team速度:
+    Team资源: 51人天=10 * 6 - 6*0.5 - 6*0.5 - 0.5 - 2.5       (迭代总天数*Team人数 - 计划会议占用人天 - 评审及回顾会议占用人天 - Team成员请假人天 - 每日站会所花人天)
+    整Team有效工作小时数: 约 265 hrs = 51*8*0.65
+    Dev 有效工作小时数:   约 166 hrs = (4*10 - 4 - 2- 0.5 - 1.5) * 8 * 0.65
+   
+    (其中, 整迭代每日会议所花时间: 20hrs =2.5天 (20/60 * 10 * 6)  
+
+页面元素:
+    有用性
+    易用性
+    技术可实现性/难度
+
+=====requirements
+1. 工程分解
+2. 邀请注册
+3. 意见反馈
+4. 邮件激活导向
+
+pip install --download 
+--index-url=http://192.168.1.114:8088/simple/
+
+lershare.profiles.models
+lershare.activity.models
+lershare.utils.
+lershare.account.
+lershare.tags
+lershare.protocol
+
+===repos:
+git clone gituser@192.168.1.114:repo.lershare.web
+git clone gituser@192.168.1.114:repo.lershare.engine
+git clone gituser@192.168.1.114:repo.lershare.api
+
+
+====Lershare Product Plan ====
+我的成长(轨迹)
+    参加过的活动/发布过的活动(各时间点)    
+    读书笔记/成长日记    
+    关注了谁(各时间点)
+    到过的地方/认识的人
+    读过的书
+    
+我的成长(计划/目标)<----合并入"期望"
+    想读的书(周/月/年)
+    想学的技能/个人提升计划(周/月/年等)
+    身体健康计划
+    想去的地方
+    想结交的人
+
+    ==轨迹呈现方式:==
+        时间轴
+        图/表
+        思维导图
+
+活动
+    活动分类管理
+    审核                                    ---DONE
+    活动图片分享（活动结束后）
+    活动图片管理
+
+个人账户
+    认证
+    第3方登录(QQ/微博)
+    自定义标签
+
+社交
+    关注/取消关注(操作)                     ---DONE
+    我(ta)的关注列表                        ---DONE
+    我的关注动态:最新参加/最新发布           ---DONE
+    私信Ta                                  ---DONE  
+
+通知
+    关注我/评论我/回复我/私信我            ---DONE
+    系统通知                              ---DONE      
+
+站内统计
+    用户反馈                              
+    模块点击量/活跃用户
+    在线人数/注册人数
+
+
+==
+会议记要:
+    分享(知识/活动)
+    记录过去经历(回到过去时间点)
+    记录荣誉值(经验值)
+    在线简易PK
+
+工作请求资源:
+    工作时间增加一次休息时间
+    按照制定的节奏来工作: 敏捷,高效
+    
+======
+活动类别：大类，小类。可自定义类型                          ----DONE
+活动热门标签                                               ----DONE
+活动标签：可自定义填写（自定义不写入DB）
+活动宣传图片集管理(海报包括在内，活动宣传图片暂设为20张上限)  ----
+活动图片分享
+显示活动宣传图(分页等)
+活动推荐:给成长线/给指定好友(发送通知)
+显示活动参加成员列表
+邀请好友参加活动(同意列为参加者)
+通知中添加邀请与推荐
+
+分享管理(文字/图片/视频等)
+    发布分享(分享视频以链接形式)
+    评论/喜欢
+    显示分享列表(及评论列表/喜欢人列表)    
+
+个人动态管理(??)
+成长线管理(??什么样的内容标注到成长线? 重要里程碑性质的事件?)
+    GrownLine: profile, point_count, created_time, 
+    GrownPoint: grownline, created_time, 
+        
+荣誉值(经验值)管理
+在线简易PK
+
+站内统计
+    用户反馈                              
+    模块点击量/活跃用户
+    在线人数/注册人数
+
+第3方登录                              ---(敬) 
+活动分享到: 新浪微博,腾讯微博,人人等    ---DONE(满,敬)
+
+
+====荣誉设计备份
+class Honor(models.Model):
+    '''个人荣誉与经验等级模型
+    与Profile模型一对一关系
+    '''
+    title = models.CharField(max_length=40, default=u'乐学小兵')    #荣誉头衔, 一般为中文名称
+    grade = models.SmallIntegerField(default=1)                     #荣誉等级
+    exp = models.IntegerField(default=DEFAULT_EXP)                  #经验值
+    mp = models.IntegerField(default=0)                             #拥有的乐穗点数
+    
+    objects = HonorManager()
+    
+    class Meta:
+        db_table = 't_honor'
+        verbose_name = 'Honor'
+        app_label = 'profiles'
+    
+====Design Plan:
+  是原有模型上扩展字段(即增加字段,通过ActProperty也是扩展字段方式)?还是新增模型(如ActPhoto:act, who, time)建立FK与原有模型(Activity)关联?
+    
+活动宣传图片集管理设计:
+    1.保存原图: 控制最大高宽(600*600)
+    2.裁剪小图: 高宽100x100(等高宽)
+    3.照片列表: 高宽上限170*170(不等高宽)
+    storage structure:
+        media/img/
+            default_pic
+            activity/  --活动海报
+            profile/   --用户头像
+            photos/    --活动图片, filename: photos/uuid1_s, photos/uuid2_n, photos/uuid3_b  
+        
+            2013-03-08 09:40:45 
+    storys:
+    上传图片(裁剪成3种尺寸保存)
+    显示小图列表
+    浏览所有图片(显示中图列表)
+    显示大图    
+
+分享管理:
+    media/img/
+        share/     --分享图片存放, share/uuid4_s, share/uuid5_b
+
+====新设计2013-03-18 ==== 整理如下并填入Scrumworks约花3.5hrs
+
+权限/头衔/组设计(Admin, 社长, 管理组, 成员, 非成员)        --Tech
+创建社团            
+显示社团基本信息: logo, 名称,成员数,所属学校, 公告, 社长等)
+显示社团成员列表
+显示社团理事会成员列表
+修改社团logo: 弹出,上传, 剪切,提交   --编辑社团信息(社团主页)
+添加动态分类
+修改社团公告
+申请加入社团
+按<学校+社团类别>显示社团列表
+邀请好友加入社团(弹出,选择,弹出,提交)
+退出社团
+
+显示正在招募的社团列表
+查找社团(按学校,类别,名称等)
+
+显示社团活跃成员列表(算法?)
+显示社团成员列表(名,头像,权限等)
+显示社团统计信息(组织活动数, 文档数,图片数等)
+修改社团成员权限(权限升降,非成员-成员-管理组,社长转让等)
+查找社团成员(某社团内/全部社团内查找)
+
+添加/删除部门(组织部,外联部, Department: 名称,人数,dpt_leader)  ---社团组织结构管理:
+添加/删除头衔(宣传部长,..., )
+成员加入/退出某部门   (社团管理组成员有权添加成员)
+招募成员(弹出,填写,发布)    
+
+发布活动(基本信息+图片)
+对活动进行评论(并显示新发布评论)
+显示活动评论列表
+显示活动详情(分享到the3rd)
+参加活动
+显示参加人员列表
+分类显示活动
+显示<匹配/最近/热门/最多参加/官推>活动列表(算法?)
+显示活动热门标签
+我的日程(日程里记录什么?)
+我的活动列表(将进行/已进行/按月份筛选)
+为活动列表添加分页效果 
+按条件查找活动并显示(类别/学校/活动标题/关键字等)
+
+关于我(基本信息:学校/专业/参加的活动/分享统计)
+我分享的图片
+显示我加入的社团列表
+添加好友
+我的好友列表
+更改个人主页封面
+
+添加Share(文字/图片)
+添加Share(视频, 要求从第3方抓取视频显示到lershare)
+删除Share
+举报Share(弹出,选择,提交)
+
+Remind              --Epic
+社团主页动态分类     --Epic ?
+
+
+Q & A:
+    社团主页是否不应该显示活动评论?因已有活动详情页显示评论列表
+    活动参加,要不要细化到"可能,否"?
+    加入社团要申请, 同时申请加入多个社团的逻辑有问题?--建议初始只允许选择一个
+    是不是少了"创建社团"这个页面?
+    我的日程(日程里记录些什么?只参加的活动?)
+    社团活跃成员的算法是什么?    
+    显示<匹配/热门>的活动列表(算法是什么?)
+    社团主页,动态的分类问题, 是否已确定按<活动/Video/Image>等分类?添加新分类的依据是什么?
+
+
+class Member():
+    def __init__(self, context):    
+        self.ctx = context
+        
+    def getName():
+        return self.ctx.name
+
+====club logo design:
+  /media/img/
+        |            
+         --logo/
+
+
+
+
+
+    
+    
+    
+
+
+
+
+   
+
+
+          
+
+
+
+    
+
+  
+    
+    
+
+    

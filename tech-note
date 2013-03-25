@@ -1,0 +1,207 @@
+tech-note:
+
+===mysql5.5 中文乱码问题解决
+[client]
+default-character-set = utf8          #added by junn
+
+[mysqld]
+#added by junn
+character-set-server=utf8
+collation-server=utf8_general_ci
+
+===scrumworks install
+http://www.danube.com/docs/scrumworks/1.8.0/linuxinstall.html
+
+
+使用GitHub步骤：
+1、申请GitHub帐户 xxx ，创建名为new-project的新Repository
+
+2、安装Git客户端（Linux）
+#yum install git git-gui
+
+3、 生成密钥对，这样项目可以push到 GitHub上
+#ssh-keygen -t rsa -C "xxx@gmail.com"
+4、将.ssh/id_rsa.pub拷贝到GitHub网站
+
+====import git repository in Aptana:
+右键import...
+chose from "Git repository"
+input uri:
+    gituser@192.168.1.114:xizhi-server
+fill the local destination
+
+
+
+==ftp GUI工具
+sudo aptitude install filezilla
+
+language-pack-gnome-zh-hans Depends  language-pack-gnome-zh-hans-base 1:12.04+20120508  1:12.04+20120801 
+
+
+http://askubuntu.com/questions/140246/how-do-i-resolve-unmet-dependencies
+
+＝＝＝飞鸽传书
+sudo apt-get install iptux
+
+===what is rest?
+从HTTP接口开始设计Web架构就是REST思想,TTP接口是系统中最稳定的User Interface。
+views, models
+http://blog.csdn.net/thinkinside/article/details/7236807  ===rest初探
+
+PHP或Python，基本上都有参考RoR思想的框架，这些框架本身借鉴了RoR的REST思想，因此天然就可以支持REST。
+
+Java
+   Apache CXF（XFire）
+   Restlet
+   Gomba
+   Apache Axis2
+PHP：
+   cakephp
+Python：
+   django
+
+===scrumworks change the default start port :
+vi $scrumworks_home/server/scrumworks/conf/bindingservice.beans/META-INF/bindings-jboss-beans.xml
+
+ --查看端口
+sudo nmap -sT -O localhost   --在linux/mac上,scrumworks端口设置必须大于1024
+lsof -i :8080               --查看哪个进程在使用8080端口
+sudo lsof -i
+
+/etc/init.d/scrumworks_init.sh start|restart|stop  --启动/停止scruworks
+
+====sudo权限
+创建新用户后添加sudo权限, vi /etc/sudoers
+add line:
+    junn ALL=(ALL) ALL
+
+
+=====from 张冬:
+server{
+listen 80;
+server_name s0.hongxiujie.com s1.hongxiujie.com s2.hongxiujie.com s3.hongxiujie.com s4.hongxiujie.com;
+
+location ~ (\.html)|(\.css)|(\.js)|(\.swf)$ {
+root '/home/admin/project/snsxiu/';
+}
+location /img {
+root '/home/admin/project/imgserver/';
+}
+
+}
+
+
+当属于下列情况时，你不该重构
+
+    对于你来说，它的逻辑看起来过于复杂，你没有花时间去分析它。
+    你不理解为什么前任程序员要这样编写。
+    你着手的是一个很重要的系统，而且时间很紧。
+    你是团队里的新成员，或新接触这个项目，或这种语言。
+
+　当属于下列情况时，你可以重构
+
+    现有的代码对它要实现的功能显得过于复杂，并且你分析过它。
+    修改后的代码远比现存的代码逻辑要清晰。
+    你有足够的时间，人手，财力来支持对项目进行回归测试。
+    现有的代码陈旧无效率。
+        无人认领的，写的很烂的代码都属于此类。
+    跟你的一位同事谈论对这部分程序进行重构的好处和存在的风险，你们两个都赞成重构。
+
+　如何降低重构的风险
+
+　　权衡一下对一段代码进行重构的利与弊，找出降低风险的方法。调试一段你经过重构但却使产品崩溃的代码，这对你来说将会是在这个行业中最有压力的事情。
+
+    使用自动化的回归测试，快速的验证你的修改。这非常重要，如果没有准备自动化测试，你应该在做任何修改前建好它。
+    尽量让你的重构处于很短的开发周期，产品更新发布周期也尽可能短。
+    把你重构的代码和其它程序隔离开，这样能让你更容易找到出问题的地方。
+    为你的重构活动准备测试计划，包括回归测试，功能测试，反向测试，负载测试，性能测试和用户确认测试。
+    投入全部精力来研究其中的逻辑，不要分心做其它事情。
+    在需要的地方使用设计模式。不要为了设计模式而增加设计模式。设计模式应该用在合适的时间和合适地方。
+
+=====代码审查 
+http://www.admin10000.com/document/1144.html
+根据smartbear在思科所作的调查，每次审查200行-400行的代码效果最好
+
+
+=====postfix setup
+https://help.ubuntu.com/community/Postfix
+sudo apt-get install postfix
+sudo dpkg-reconfigure postfix
+    Insert the following details when asked (replacing server1.example.com with your domain name if you have one):
+
+        General type of mail configuration: Internet Site
+
+        NONE doesn't appear to be requested in current config
+
+        System mail name: server1.example.com
+
+        Root and postmaster mail recipient: <admin_user_name>
+
+        Other destinations for mail: server1.example.com, example.com, localhost.example.com, localhost
+
+        Force synchronous updates on mail queue?: No
+
+        Local networks: 127.0.0.0/8
+
+        Yes doesn't appear to be requested in current config
+
+        Mailbox size limit (bytes): 0
+
+        Local address extension character: +
+
+        Internet protocols to use: all
+
+https://help.ubuntu.com/community/PostfixBasicSetupHowto  ---nice basic
+ assume that you know what an MX record is. To find out MX your type in a terminal: 
+       > dig mx yourdomain.com
+sudo apt-get install mailutils
+telnet localhost 25  --test default installation
+sudo postfix status  --check postfix status
+
+Make Postfix to receive mail from the Internet
+    sudo postconf -e "inet_interfaces = all"
+
+telnet localhost 25
+    ehlo localhost
+    mail from: root@localhost
+    rcpt to: fmaster@localhost
+    data
+    Subject: My first mail on Postfix
+
+    Hi,
+    Are you there?
+    regards,
+    Admin
+    . (Type the .[dot] in a new Line and press Enter )
+    quit
+ 
+
+Installing courier IMAP and POP3
+    sudo apt-get install courier-imap courier-pop
+    sudo postconf -e "mydestination = mail.fossedu.org, localhost.localdomain, localhost, yourdomain.com"
+    sudo postconf -e "mynetworks = 127.0.0.0/8, 192.168.1.0/24"
+sudo postconf -e "inet_interfaces = all"
+sudo postconf -e "inet_protocols = all"
+sudo  /etc/init.d/postfix restart  --or sudo service postfix restart
+
+Testing Courier POP3
+    netcat mail.yourdomain.com 110
+
+Testing Courier IMAP
+    netcat mail.yourdomain.com 143
+
+====邮件服务器
+tail -f /var/log/message查看邮件发送消息
+
+====DMZ开启：外网访问区域网机器：
+1.进入路由器,运行状态-->	WAN口状态,得到ip地址118.112.133.54
+2.进入 转发规则--->DMZ主机--->设置DMZ 主机IP地址（置为局域网内某主机的内网IP，如192.168.1.114）
+  --->启用 保存
+
+
+
+
+
+
+
+

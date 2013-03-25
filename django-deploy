@@ -1,0 +1,371 @@
+
+=============deploy知识
+fagungis
+    安装与设置gunicorn(django server,wsgi类型)
+    安装与设置nginx(处理静态内容，反向代理gunicorn请求）
+    安装virtualenv, 并将base.txt所列的所有包被装到virtualenv下
+    supervisor:启动/重启/监控 gunicorn和nginix
+    
+部署目录结构：
+/home/zongsui/production/        
+                projects/
+                envs/
+                logs/
+                    nginx/
+                    projects/
+                configs/
+                    nginx/
+                    supervisord/
+                scripts/
+                htdocs/
+                tmp/
+
+===Django应用部署安装过程(Nginx+Gunicorn+Fagungis组合)
+1. preparing
+安装Ubuntu10及以上版本，更新sources.list(新版一般默认已设置163源，无需更改)
+创建用户(如hello), 将其添加到sudoers组(即通过sudo具有super权限，如何添加参见-->)
+创建/home/hello/prod， /home/hello/media等目录
+安装MySQL及相关python依赖：
+      sudo apt-get install mysql-server
+      sudo apt-get install python-setuptools libmysqlclient-dev 
+                  --to solve "mysql_config" not found
+      sudo apt-get install python-pip python-dev build-essential     --important
+
+安装git（或hg)
+
+2. 安装与配置fagungis:
+      pip install django-fagungis
+      获取fabfile.py文件，放入/home/hello/目录下(hello用户主目录)，参考样例修改配置。
+
+3. fab mysite test_configuration -->检查配置情况
+    fab mysite setup   --若重做该操作，保险起见需删除/home/hello/prod/projects/project_prod/目录
+
+4. fab mysite deploy
+   注：以上步骤若成功整个布署过程中将只进行一次。以后对静态、动态代码的修改，只需进行step 5,
+         只需要对nginx, gunicorn进行重启即可
+
+5.启动server
+   sudo supervisorctl start  --启动gunicorn
+   sudo supervisorctl restart mysite --重启mysite应用
+   sudo service nginx restart  --重启nginx
+
+------------       
+6. 可能遇到的问题与解决方案：
+1）====fab mysite setup出错
+若fab mysite setup 时，可考虑:
+     将base.txt内容全部注释(或清空)，再进行setup操作
+     手动执行：pip install -r project.txt  ----安装各种依赖包
+
+   source /home/zongsui/prod/envs/mysite/bin/activate
+sudo ~/prod/envs/mysite/bin/pip install -r /home/zongsui/prod/projects/mysite/requirements/project.txt  --注意：该pip应该为~/prod/envs/bin/pip下的pip
+
+2) ====创建新数据库 new database:（防止乱码）
+CREATE DATABASE lershare CHARACTER SET UTF8 COLLATE utf8_general_ci;  
+
+解决：进入MySQL后，中文数据显示乱码问题:
+  a). 找到 /etc/my.cnf 文件，或者/etc/mysql/my.cnf.若未找到,
+    则find / -name '*.cnf'   
+        -－－－拷贝任一个small.cnf、my-medium.cnf、etc. to dir /etc/, 改名为my.cnf
+  b). 修改 /etc/my.cnf(或/etc/mysql/my.cnf)
+
+-----mysql 旧版中文乱码解决方案:
+  ==在[client]下添加：
+    default-character-set=utf8  
+  ==在[mysqld]下添加：
+    default-character-set=utf8
+  c). 重启mysql:
+ sudo /etc/init.d/mysql restart
+
+
+===mysql5.5中文乱码解决方案:
+[client]
+default-character-set = utf8          #added by junn
+
+[mysqld]
+#added by junn
+character-set-server=utf8
+collation-server=utf8_general_ci
+
+运行sql script: source xxx.sql
+
+3）====刚部署完，第一次请求站点时错误：The _imagingft C module is not installed.
+    或 出现：上传图片失败。 IOError: decoder jpeg not available。
+解决：
+
+    删除已经安装的PIL：
+
+       $ rm -rf /usr/lib/python2.5/site-packages/PIL  －－换成envs/下的lib包路径
+       $ rm /usr/lib/python2.5/site-packages/PIL.pth
+
+    $sudo apt-get install libjpeg-dev libfreetype6-dev
+    source /home/zongsui/prod/envs/bin/activate   --使得在当前pip/python下安装运行程序
+    pip install PIL    --重新安装PIL
+
+4) ====无法找到所有静态文件(css,js图片等)
+/home/zongsui/media/media/img/default_pic_small" failed
+/home/zongsui/prod/projects/mysite/static/static/css/facebox.css"
+
+查看日志文件：nginx log file: 这两个日志文件里能找到非常关键的错误信息，利于调错。
+     /var/log/nginx/access.log
+     /var/log/nginx/error.log
+
+在所請求的url前多加了static ，或 media。
+解决：
+    检查configs/nginx/mysite.conf 文件，发现以下两配置应为：
+        location /media/
+        {
+                root /home/zongsui/;  #而不是/home/zongsui/media
+        }
+
+        location /static/
+        {
+                root /home/zongsui/prod/projects/mysite/;#而不是/home/zongsui/prod/projects/mysite/static
+        }
+
+5) ====deploy时因为找不到repository问题
+fab mysite deploy时无法找到repository（代码库），
+解决：删除整个工程重新setup,问题解决。
+
+=====其他
+sudo pip install -U pycrypto  ---更新python相关包，if neccessary
+fab mysite setup
+    --本地部署，需要ssh server,并打开22端口
+    --At the end of this,you must view a message saying the setup successful
+    --这一步出错的可能性较大。自动化之前可以做一些手动检查，如下步骤：
+          --参考https://bitbucket.org/DNX/django-fagungis/wiki/Setup_test)
+
+        dpkg -l "mercurial*"
+        getent passwd django
+        Check folder structure
+        Project correctly cloned
+        Virtualenv correctly created
+        Project requirements correctly installed
+        Check your project nginx configuration
+        symlink to sites-enabled correctly created
+        run nginx test configuration
+        check nginx on your browser
+        Rungunicorn script presence
+        Check supervisord
+        supervisord loaded your project
+
+    --PS: to redo the setup you must delete your project: rm -rf /home/zongsui/production/projects/project_prod/
+
+fab mysite deploy
+     setup nginix: mysite.conf --delete www for env.nginx_server_name
+
+==检测配置文件
+sudo nginx -t
+
+update user set Password=PASSWORD('mysql') where user='root';  
+    ----update user with name "root" password to "mysql";
+
+
+steps:
+DB: 中文化
+数据定期备份（恢复）
+
+======================nginx IP禁止恶意指向
+比如别人通过ip或者未知域名访问你的网站的时候，你希望禁止显示任何有效内容，可以给他返回500.
+目前国内很多机房都要求网站主关闭空主机头，防止未备案的域名指向过来造成麻烦。就可以这样设置：
+
+在nginx.conf中http段落内添加server段的配置：（/etc/nginx/nginx.conf）
+server {  
+    listen 80 default;  
+    return 500; # return 403,...
+}
+
+也可以把这些流量收集起来，导入到自己的网站，只要做以下跳转设置就可以：
+server {  
+    listen 80 default;   #default表示默认虚拟主机，未知域名或通过IP访问
+    rewrite ^(.*) http://zongsui.com permanent;  #301重定向到自己的网站
+    #return 403;                                 #或者返回相应的状态码
+}
+
+#禁止IP访问  
+server {  
+    listen 80 default;  
+    server_name _;  
+    return 500;      #return 403; rewrite ^(.*) http://zongsui.com permanent;  #301重定向到自己的网站
+}
+
+# for site is maintaining
+server {
+    listen 88;
+    #server_name 192.168.1.114;
+    index 555.html;
+    root  /home/johnson/prod/projects/xizhi-server/templates/;
+}
+
+
+在http://help.chinacache.com/monkey/simple 查询一下客户端IP和Local DNS
+
+
+参考https://bitbucket.org/DNX/django-fagungis/wiki/Setup_test
+现在nginx监听端口设为80，so host需要打开80端口
+ps -ef|grep manage.py  --check if app started
+if want to restart app, kill the first running manage.py     
+
+
+
+http://wiki.open.t.qq.com/index.php/OAuth2.0%E9%89%B4%E6%9D%83/Implicit%E6%8E%88%E6%9D%83%E6%A1%88%E4%BE%8B
+
+
+ulimit -n
+getconf PAGESIZE   --客户端请求头部的缓冲区大小
+
+=======packaging-django-reusable-app（django应用打包）
+    详情见：https://docs.djangoproject.com/en/dev/intro/reusable-apps/
+
+1. 创建目录：lershare-engine
+2. copy apps(or modules) into lershare-engine
+3. create lershare-engine/README.txt file:  包括安装使用说明
+4.  create a lershare-engine/setup.py, include following:
+   
+ >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>     
+    import os
+    from setuptools import setup
+
+    README = open(os.path.join(os.path.dirname(__file__), 'README.txt')).read()
+
+    # allow setup.py to be run from any path
+    os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
+
+    setup(
+        name = 'lershare-engine',
+        version = '0.1.0',
+        packages = ['activity', 'profiles'],
+        include_package_data = True,
+        #license = 'BSD License', 
+        description = 'lershare models.',
+        long_description = README,
+        url = 'http://www.lershare.com',
+        author = 'Xiong Jun',
+        author_email = 'jun.xiong@lianbi.com.cn',
+        classifiers = [
+            'Environment :: Web Environment',
+            'Framework :: Django',
+            'Intended Audience :: Developers',
+            'License :: OSI Approved :: BSD License', # example license
+            'Operating System :: OS Independent',
+            'Programming Language :: Python',
+            'Programming Language :: Python :: 2.6',
+            'Programming Language :: Python :: 2.7',
+            'Topic :: Internet :: WWW/HTTP',
+            'Topic :: Internet :: WWW/HTTP :: Dynamic Content',
+        ],
+    )
+ >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+5. create the lershare-engine/MANIFEST.in file, add like:
+    include LICENSE
+    recursive-include polls/templates *
+    recursive-include docs *
+        --Only Python modules and packages are included in the package by default
+        --To include additional files, we'll need to create a MANIFEST.in file.
+
+6. in lershare-engine dir, run command:
+    >>python setup.py sdist
+
+=====Using your own package
+7. Inside django-polls/dist, untar the new package lershare-engine-0.1.tar.gz
+
+8. change into lershare-engine－0.1
+
+9. install the package:
+    >> python setup.py install
+
+10. uninstall package using pip:
+    >> pip uninstall lershare-engine
+    
+
+MANIFEST.in：
+
+    global-include ANNOUNCE AUTHORS ChangeLog INSTALL LICENSE.TXT README TODO
+    include *.png
+    include *.rfxml
+    prune dabodemo
+    prune daboide
+    prune dist
+
+解释：
+setup.py在执行时会查找MANIFEST.in文件来动态生成MANIFEST文件。上述为什么要使用global-include呢？因为它后面的文件并不在当前目录下。而如果改为include，则在测试时报找不到文件错。因此我想这样的处理应该是将这些静态文件放在与setup.py同级目录下才可以。而我的测试环境不是这样，所以使用了global-include来处理，但这样一来出现什么问题呢？所有在setup.py同级的目录都将被搜索到，连刚生成的dist目录也不例外，这样就会包括进去许多无用的文件，因此后面又使用了prune命令来将不想处理的目录过滤掉。
+
+
+
+====Auto packaging steps:
+1.update code
+2.python setup.py sdist  --use version for param
+3.scp -r /home/junn/work/release/lershare-engine/dist/lershare-engine-xxx.tar.gz projmgr@192.168.1.114:/home/projmgr/applications/pypi-packages/download/   --also use the version for param
+4.pip install -U --index-url=http://192.168.1.114:8088/simple lershare-engine    
+        --Upgrade all packages to the newest available version
+   --or use command: 
+        pip uninstall lershare-engine, then 
+        pip install lershare-engine)
+
+
+====pip update and download all django-packages:
+ pip install -U -d ~/python-libs/ -r requirements/base.txt
+            --- -U update already installed packages
+            --- -d download package(and not install it)
+
+python setup.py --version   ----print package version
+python setup.py --name
+
+os.system(cmd)，os.system只是执行一个shell命令，不能输入、且无返回
+os.open(cmd)，可以交互，但是是一次性的，调用都少次都会创建和销毁多少次进程，性能太差
+
+====auto script:
+SRC_DIR = '/home/johnson/114simple/lershare-engine'
+DIST_DIR = '/home/projmgr/applications/pypi-packages/download/'
+PACKAGE_URL = 'http://192.168.1.114:8088/simple/'
+PACKAGE_NAME = ｀python setup.py --name｀
+PACKAGE_VERSION = `python setup.py --version`
+DIST_NAME = "$PACKAGE_NAME-$PACKAGE_VERSION.tar.gz"
+
+cd $SRC_DIR
+sudo git pull
+python setup.py sdist
+sudo cp $SRC_DIR/dist/$DIST_NAME $DIST_DIR
+pip install -U -i $PACKAGE_URL $PACKAGE_NAME
+
+==pip 命令安装lershare-engine
+安装时可能从/home/junn/work/mysite-env/build目录下取
+如果lershare-engine版本安装不成功,可考虑删除build目录,再重新安装.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

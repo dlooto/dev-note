@@ -1,0 +1,185 @@
+
+================ Python/Django编码规范(初稿) =================
+
+====原则====
+>> 一致性
+整个项目中所有开发人员,应就某种开发与编码规范进行协定,并达成一致, 以便团队整体协作与代码的高质量.
+
+打破一条既定规则的两个理由: 
+    当应用这个规则时将导致代码可读性下降, 即便对某人来说, 他已经习惯于按这条规则来阅读代码了.
+    为了和周围的代码保持一致而打破规则.    
+
+>> 见名知意
+应从名字即可大致从功能,业务上推测其用途, 但也应控制长度,合理使用常见单词缩写(一般规则, 去掉元音留下辅音字母).
+保持简洁,干净.
+
+>> 其他约定
+本规范中遗漏及未约定部分, 以团队中成员相互达成的各种约定为依据.
+
+
+====命名篇====
+
+>> 变量命名
+    model类中: 持久化属性字段(db_column)以下划线形式命名，如：
+        is_public, created_date, max_count
+
+    其他变量(非db_column变量)： 驼峰式mixedCase，大小写间隔。如： 
+        newActivity, commentCount,
+
+>> 常量命名
+    全部大写，以_（下划线）分隔,如：
+        MAX_LATEST_UPDATED = 30， 
+        STATIC_URL = "/site_media/static/"
+        PHOTO_SIZE_BIG = (300, 200)
+
+>> 方法命名：
+    驼峰式(mixedCase)，大小写间隔形式（不用下划线），如:  
+        getFriends(), getDefaultBook(user)
+
+    命名应以见名知义为原则,采用英文动词, 或动宾结构,如:
+        follow(), addComment(**kwarg)
+        
+    对Bool型返回值方法,采用如下命名结构,如下:
+        isFriendWith(someone)
+        canDoSomething()
+        hasXxxx()
+
+>> 包命名： 
+    尽量一个单词，简短的全部小写.如下：
+        profiles/
+        account/
+        activity/
+    
+>>  模块命名:
+    全部小写, 以下划线分割, 名词结构.
+        forms.py:  存放各种表单类，如DiaryForm, DiaryBookForm, LoginForm
+        models.py: 存放各种DB模型类及业务方法：如，Photo， ProfileManager，Comment
+        views.py:  存放各种处理url请求的view方法.
+        urls.py:   定义各URL请求，对应的处理view方法
+
+                ---以上从框架技术层面命名模块
+        
+        profile.py  
+        share.py    
+                --以上从业务层面命名模块
+
+    其中, url设计全部为小写, 以下划线分割, 末端匹配结果允许:
+    动宾结构(如/update_pwd/), 名词(/home/), 或单一动词(/login/)等如下:
+        /account/login/
+        /account/update_password/
+        /activity/new/
+        /activity/edit/28
+
+    url(r"^add_tag/$", "profiles.views.addTag", name="profiles_addtag")
+        ----name="profiles_addtag": 以所属模块或app开头,下划线连结,全部小写,动词[宾语]. 勿要重复.
+
+>> HTML模板文件名
+    全部小写，以下划线分隔,名词或动宾结构,如下:
+        upload_photos.html
+        create_activity.html
+        fans_list.html
+        activity_list.html
+
+    具体参考已有html页面.
+
+>> 私有属性
+私有属性必须有两个前置下划线, 非公有属性必须有一个前置下划线,无后置下划线.如:
+    ## 私有属性
+    __book = None       # python强制私有
+
+    ## 非仅有属性(类似Java等语言的protected属性)
+    _hello = None       # 非python强制性私有
+    def _goUserPage():
+        pass
+
+
+====其他建议====
+
+>> 换行与空行
+建议最大行长80字符,一行代码超过该长度应考虑换行. 
+
+另, 为了使代码清秀整洁, 对于元组,字典等类型, 当其内部元素较多且各元素较长(但并未满一行)时也应考虑换行,如下:
+acttagsPaging = initSessionTagPaging(
+		request, 
+    ACTIVITY_TAG_TYPE, 
+    HOME_TAG_PAGING_KEY, 
+    settings.HOME_TAG_PAGE_SIZE
+)
+---以上新行应向左缩进4个空格.
+
+代码内, 各不同逻辑单元间应增加空行, 以使代码清晰可读.
+
+
+>> 模块导入
+文件头部模块导入时, 应进行分组, 组间应以空行间隔,　遵循以下顺序:
+    系统模块
+    Django框架模块
+    第3方模块
+    项目定义模块
+    
+示例:
+    import os
+    import datetime
+
+    from django.db import models
+    from django.db.models import Q
+
+    from idios.models import ProfileBase
+    from pinax.apps.account.openid_consumer import PinaxConsumer
+
+    from lershare.utils import egg
+    from lershare.profiles.models import Profile
+
+
+>> 注释
+为所有公共模块, 函数, 类和方法编写文档字符串. 文档字符串对非公开的方法不是必要的.
+
+多行文档字符串结尾的 """ 应单独成行,如下:
+    def foo():
+        """
+        Calculates something and returns the result.
+        """
+        pass
+        
+    
+>> 异常定义
+基于类的异常好过基于字符串的异常. 模块和包应该定义它们自己的域内特定的基异常类(base exception class), 
+基类应该是内建的Exception类的子类, 且始终包含一个类的文档字符串.
+
+
+====Django工程结构规范====
+示例如下:
+lershare-web/
+    apps/
+        account/
+        profiles/
+        ...
+    templates/
+        account/
+        profiles/
+        ...
+    static/
+        facebox/
+            css/ js/ img/
+        lershare/
+            css/ js/ img/        
+        ...
+    fixtures/
+    __init__.py
+    urls.py
+    settings.py
+
+====model内的类和方法的定义顺序====
+遵循如下顺序（不是所有项都是必需的）,并以空行间隔：
+    所有的数据库字段
+    自定义管理器属性（manager attributes）
+    class Meta
+    def __unicode__()
+
+    def save()
+    def get_absolute_url()
+    其他自定义方法
+
+
+
+    

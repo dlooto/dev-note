@@ -1,0 +1,36 @@
+
+===联璧官网维护
+
+===启动php:
+    ps -ef|grep php
+    /usr/local/bin/spawn-fcgi -a 127.0.0.1 -p 9000 -C 2 -u www-data -g www-data -f /usr/bin/php5-cgi   --优先使用该命令启动php5-cgi
+    
+    php5-cgi -b 127.0.0.1:9000   --以上不行可考虑该命令. 若先执行该命令,再使用以上spawn-fcgi命令,则会抛出socket已占用错误
+
+
+直接使用php-cgi的FastCGI运行方式有两个问题:
+    如果进程崩溃，难以配置重新启动
+    单进程的效率低
+
+==安装spawn
+wget http://www.lighttpd.net/download/lighttpd-1.4.18.tar.bz2 #获取Lighttpd的源码包
+tar -xvjf lighttpd-1.4.18.tar.bz2
+cd lighttpd-1.4.18
+./configure  #编译
+make
+cp src/spawn-fcgi /usr/local/bin/spawn-fcgi #取出spawn-fcgi的程序
+
+使用 spawn-fcgi 来控制php-cgi的FastCGI进程:
+    /usr/local/bin/spawn-fcgi -a 127.0.0.1 -p 9000 -C 2 -u www-data -g www-data -f /usr/bin/php5-cgi
+        ----这条命令同时启动php5-cgi
+
+参数含义如下
+    -f <fcgiapp> 指定调用FastCGI的进程的执行程序位置，根据系统上所装的PHP的情况具体设置
+    -a <addr> 绑定到地址addr
+    -p <port> 绑定到端口port
+    -s <path> 绑定到Unix Socket的路径path
+    -C <childs> 指定产生的FastCGI的进程数，默认为5（仅用于PHP）
+    -P <path> 指定产生的进程的PID文件路径
+    -u和-g FastCGI使用什么身份（-u 用户 -g 用户组）运行，Ubuntu下可以使用www-data，其他的根据情况配置，如nobody、apache等
+
+然后我们可以将这行代码加入到/etc/rc.local文件底部，这样系统启动的时候也可以同时启动PHP的FastCGI进程。

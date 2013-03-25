@@ -1,0 +1,1536 @@
+Python note:
+>>> v = ('a', 'b', 'e')
+>>> (x, y, z) = v
+
+===loop:
+for i in range(10):
+    print 'xjbean'
+
+lambda 函数是一个可以接收任意多个参数(包括可选参数)并且返回单个表达式值的函数。
+>>> g = lambda x: x*2  
+>>> g(3)
+6
+
+>>> (lambda x: x*2)(3)
+6
+
+lambda 函数是风格问题。不一定非要使用它们，任何能够使用它们的地方，都可以定义一个分离的普通的函数，用它来替换.
+我将它们用在需要封装特殊的，非重用的代码上，用许多小的一行函数不会弄乱我的代码。
+
+=====三元运算
+return self.replyList if self.replyList else None
+
+给模块起别名：
+import ftplib as ftp
+
+Python脚本和模块都是一个以.py结束的文件，那程序是如何判断一个.py文件是作为脚本还是模块呢？
+关键是一个名为__name__的变量，如果它的值是__main__，则不能作为模块，只能作为脚本直接运行
+
+__init__.py: 包的初始化文件
+
+import sys
+
+import会完成以下三个操作：
+    创建新的名称空间（namespace），该名称空间中拥有输入模块中定义的所有对象；
+    执行模块中的代码；
+    创建该名称空间的变量名
+
+在目录下名hello.py文件里定义一个Dog class, 然后进入python， from hello import hello
+
+d = Dog  --执行后，访问d.name将显示name未定义
+
+＝＝＝＝＝＝＝＝python私有变量
+_foo :  ？
+__foo:  私有类成员
+__foo__: python特殊专用标识，如__init__()表构造函数
+
+＝＝＝pdb调试
+在py文件里加入如下语句：
+import pdb
+pdb.set_trace()
+
+
+n:next
+q:quit
+r:return
+c:continue
+b:break
+h:help
+s:step
+
+运行系统程序
+
+>>>import os
+>>>os.system('ls')            #用os.system()可执行系统命令
+>>>exec "os.system('ls')"     #用exec可执行字符串中的命令，两个命令的效果一样。
+
+通过getattr可以得到一个在运行时才知道具体函数名的对象的引用，能增强我们程序的灵活性。
+
+>>> li=['a','b']
+>>> getattr(li,'append')
+>>> getattr(li,'append')('c')          #相当于li.append('c')
+>>> li
+
+hasattr用于确定一个对象是否具有某个属性。
+
+语法：
+ hasattr(object, name) -> bool
+判断object中是否有name属性，返回一个布尔值。
+
+以下划线开头的标识符是有特殊意义的。以单下划线开头（_foo）的代表不能直接访问的类属性，需通过类提供的接口进行访问，不能用“from xxx import *”而导入；以双下划线开头的（__foo）代表类的私有成员；以双下划线开头和结尾的（__foo__）代表python里特殊方法专用的标识，如__init__（）代表类的构造函数。
+
+
+python字符串操作：
+len(str)
+cmp(str1,str2) --比较字符串
+
+================================================================================
+Djaogo note:
+
+change server port:
+    python manage.py runserver 8080
+
+python manage.py runserver 0.0.0.0:8000   --share with other people
+
+为什么我们运行python manage.py shell而不是python?
+python manage.py shell.
+
+manage.py shell命令有一个重要的不同: 在启动解释器之前,它告诉Django使用
+哪个设置文件。Django搜索DJANGO_SETTINGS_MODULE环境变
+量,它被设置在settings.py中。例如,假设mysite在你的Python搜索路径中,那么
+DJANGO_SETTINGS_MODULE应该被设置为:’mysite.settings’
+    运行命令:python manage.py shell,它将自动帮你处理DJANGO_SETTINGS_MODULE
+
+
+eclipse python plug-in:
+http://pydev.org/updates
+svn plugin
+ http://download.eclipse.org/technology/subversive/0.7/update-site/
+
+Django quick start:
+1. create a project
+     django-admin.py startproject mysite
+        --manage.py
+        --settings.py
+        --urls.py
+2. ./manage.py runserver
+
+3. ./manage.py startapp blog  #create app
+        --__init__.py
+        --models.py
+        --views.py
+       config settings.py, find INSTALLED_APPS and add:
+            'mysite.blog',
+
+4. Design model
+    from django.db import models
+    class BlogPost(models.Model):
+        ...
+
+5. Set up DB
+    in settings.py file: #(need to create a DB schame first--username/pwd)
+        DATABASE_ENGINE="mysql"
+        DATABASE_NAME="djangodb"
+        DATABASE_HOST="localhost"
+        DATABASE_USER="root"
+        DATABASE_PASSWORD="root"
+
+6. create tables
+    ./manage.py syncdb  # when add new models, we need to run this command again
+
+7. Set admin app (optinal)
+    1) open settings.py
+
+8. create admin.py module in your app, add statement like:
+    admin.site.register(Diary)
+
+===============================================================================>
+Mysql setup:
+数据库的关键信息都写在settings.py中，这样做是非常不安全的。现在可以在settings.py里面使用DATABASE项代替以上的配置项，username和password可以写在配置文件中。下面是把username和password放到MySQL数据库的配置文件中，由DATABASE项读取的示例：
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'OPTIONS': {
+            'read_default_file': '/etc/mysql/my.cnf',
+        },
+    }
+}
+
+# my.cnf
+[client]
+database = xxx
+user = xxx
+password = xxxxxx
+default-character-set = utf8
+
+3 关于字符长度
+s = u"你好abcd"             
+>>> len(s.encode('utf8'))   ---utf8编码方式，每个中文汉字＝3个英文字符
+10
+>>> len(s.encode('gbk'))    ---gbk编码方式，每个中文汉字＝2个英文字符
+8
+>>> len(s.encode('gb18030')) ---同gbk编码方式，只是字符集要大
+8
+
+
+
+也可以在DATABASES中加入NAME来指定数据库名，client中去除database选项，HOST和PORT这些也都可以写在my.cnf文件中。   
+
+install mysql python driver:
+
+summary steps:
+    $ tar xfz MySQL-python-1.2.1.tar.gz
+    $ cd MySQL-python-1.2.1
+    $ # edit site.cfg if necessary
+    $ python setup.py build
+    $ sudo python setup.py install # or su first
+
+required:
+    1)install mysql
+    2)install python-setuptools
+    3)install libmysqlclient-dev   --to solve "mysql_config" not found
+
+verify mysql driver:
+>>> import MySQLdb
+>>> MySQLdb.apilevel
+'2.0'
+
+DATABASES = {
+ 13     'default': {
+ 14         'ENGINE': 'django.db.backends.mysql', # Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
+ 15         'NAME': 'puer',                      # Or path to database file if using sqlite3.
+ 16         'USER': 'root',                      # Not used with sqlite3.
+ 17         'PASSWORD': 'root',                  # Not used with sqlite3.
+ 18         'HOST': 'localhost',                      # Set to empty string for localhost. Not used with sqlite3.
+ 19         'PORT': '3306',                      # Set to empty string for default. Not used with sqlite3.
+ 20     }
+ 21 }
+
+
+Python & Django learning note:
+
+for p in publisher_list:
+    print '(%s %s %s %s %s)' % (p.name, p.address, p.city, p.country, p.website)
+
+
+or can do by following:
+    sudo easy_install MySQL-python
+===============================================================================>
+install apache:
+sudo apt-get install apache2 libapache2-mod-python
+
+
+===============================================================================>from-import语法
+from module import 语法：
+Python 中的 from module import * 像 Java 中的 import module.* ；
+Python 中的 import module 像 Java 中的 import module 。
+
+sudo pip install -U pycrypto  ---更新python相关包
+
+>>> import types
+>>> types.FunctionType             1
+<type 'function'>
+
+>>> FunctionType                   2
+Traceback (innermost last):
+  File "<interactive input>", line 1, in ?
+NameError: There is no variable named 'FunctionType'
+
+>>> from types import FunctionType 3
+
+>>> FunctionType                   4
+<type 'function'>
+
+解释：
+1     types 模块不包含方法，只是表示每种 Python 对象类型的属性。注意这个属性必需用模块名 types 进行限定。
+2     FunctionType 本身没有被定义在当前名字空间中；它只存在于 types 的上下文环境中。
+3     这个语法从 types 模块中直接将 FunctionType 属性导入到局部名字空间中。
+4     现在 FunctionType 可以直接使用，与 types 无关了。
+
+什么时候你应该使用 from module import？
+    如果你要经常存取模块的属性和方法，且不想一遍遍地敲入模块名，使用 from module import。
+    如果你想要有选择地导入某些属性和方法，而不想要其它的，使用 from module import。
+    如果模块包含的属性和方法与你的某个模块同名，你必须使用 import module 来避免名字冲突。
+
+另外，它只是风格问题，你会看到用两种方式编写的Python代码。
+尽量少用 from module import * ，因为判定一个特殊的函数或属性是从哪来的有些困难，并且会造成调试和重构都更困难   －－-!!!
+
+＝＝＝＝＝＝静态方法
+带 self 参数的方法为类的实例方法。使用 staticmethod 和 classmethod 函数将方法创建为静态方法和类方法，可以用类变量或实例变量调用它们。
+
+class C:
+    instNum = 0
+    def __init__(self):
+        C.instNum += 1
+    def printInstNum():
+        print 'Instances number: ', C.instNum
+    printInstNum = staticmethod(printInstNum)
+
+或者用装饰器：
+class C:
+    # ...
+    @staticmethod
+    def printInstNum():
+        print 'Instances number: ', C.instNum
+
+====从设计的角度，或许更希望用属性(property)来代替字段(field)。
+>>> class A:
+...     def __init__(self):
+...             self.__i = 1234
+...     def getI(self): return self.__i
+...     def setI(self,value):self.__i = value
+...     def delI(self):del self.__i
+...     I = property(getI, setI, delI, "property I")
+
+===============================================================================>python False
+空列表[]
+空元组()
+空字典{}
+空字符串''
+零值0
+特殊对象None
+对象False
+
+除以上几点所有东西都视为True
+
+
+===============================================================================>CSRF orbidden (403) 错误
+CSRF verification failed. Request aborted.
+
+Solved:
+1. 在表单里加上{% csrf_token %}就行了。
+
+2. 在Settings里的MIDDLEWARE_CLASSES增加配置：
+
+    'django.middleware.csrf.CsrfViewMiddleware',
+    'django.middleware.csrf.CsrfResponseMiddleware',
+
+
+sudo apt-get install python-pip
+
+pip is a tool bundled with virtualenv to install Python packages.
+( 一个与virtualenv绑定的工具，用于安装python相关的包（依赖库）)
+You should become very familiar with this tool.
+it is used in Pinax extensively to handle dependencies.
+
+pip：一个安装和管理python包的工具，It’s a replacement for easy_install.
+The recommended way to use pip is within virtualenv, since every virtualenv has pip
+installed in it automatically. This does not require root access or modify your system Python installation
+
+=============================Pinax install and quick start:
+====Install Pinax
+Prerequisites¶
+    python2.4+
+    virtualenv 1.4.7+
+    PIL --
+
+==========virtualenv虚拟环境
+Virtualenv 对于 Python 项目来说是必须的. 它提供一个隔离不同 Python 运行环境的方法.
+典型的, 我们在 /opt/webapps/<site_name> 部署生产环境站点, 在 ~/webapps/<site_name> 目录部署我们的开发环境站点.
+每个 project 有它自己的 virtualenv, virtualenv 还充当 project 所有相关代码的根目录.
+使用 pip 为 virtualenv 添加必要的包. 在virtualenv里推荐使用pip进行包的安装。
+
+=====搭建django项目环境： （start-up）
+1.建立项目虚拟环境
+    Download and Install virtualenv: http://pypi.python.org/pypi/virtualenv
+    $ cd  ~/work/
+    $ mkdir mysite-env
+    $ virtualenv mysite-env
+    $ source mysite-env/bin/activate
+
+2.如果从0开始，需要进行以下创建Pinax工程结构步骤。
+(mysite-env)$ pip install Pinax     --the Pinax has included the django lib  
+(mysite-env)$ pip install django    --若安装pinax过程中下载安装django包失败，则用此
+(mysite-env)$ pip install PIL
+(mysite-env)$ pip install psutil    --此为系统进程操作工具库(可选，optional)
+   
+－－－以上所有安装的包，都会被放入(mysite-env)/lib/python2.6/site-packages/下面，由此
+－－－该环境将成为一个独立的python环境，与其他隔离。运行该环境django server时需用如下解释器：
+    (mysite-env)/bin/python
+
+2.0 当从零开始建立基于Pinax的工程时，使用以下步骤，否则跳到 step 3
+    ==Create a project and install default project base --Zero :
+    (mysite-env)$ pinax-admin setup_project mysite
+        --pinax comes with many different project bases. The default project based is what we call layer zero.
+
+    ==list the existing projects:
+    pinax-admin setup_project -l
+
+    ==Specifying a different project base:
+    (mysite-env)$ pinax-admin setup_project -b basic mysite
+
+    ==run a project:
+    (mysite-env)$ python manage.py syncdb
+    (mysite-env)$ python manage.py runserver
+
+    ==solve error: Django manage.py syncdb throwing No module named MySQLdb
+    bin/easy_install mysql-python  
+
+    ==solve no module named metron  ****
+    (mysite-env)$ bin/python mysite/manage.py syncdb
+    (mysite-env)$ bin/python mysite/manage.py runserver
+
+    ＝＝将已有Pinax结构的工程直接拷贝到 $mysite-env 下
+
+3. 在Eclipse新建工程，将已有pinax工程导入进去，设置IDE环境（解释器，Debug方式）
+
+4. 下载安装所有需要的包：
+    bin/pip install -r path/to/requirements.txt   
+    －－requirements.txt文件从已搭建好的pinax环境里导出(pip freeze > requirements.txt)
+
+
+=======python项目包管理
+服务器环境与本地开发环境不是完全一样, 在本地开发过程中安装一些python django 的第三方包如：
+PIL ,django-voting,debug-toolbar... 一大推。难道要在服务器上从来再pip install 一次吗？
+
+1.导出项目当前所依赖的所有包
+(mysite-env)$ bin/pip freeze > requirements.txt    --可以换成任何别的名字
+
+    －－ requirements.txt叫需求文件，如下：
+    MySQL-python==1.2.2
+    PAM==0.4.2
+    PIL==1.1.7
+    Pinax==0.9a1
+    。。。
+
+2. 上传到服务器上,用以下命令就可以下载所有依赖的包.
+mkdir product-env
+virtualenv product-env
+cd product-env
+source bin/activate
+(product-env)$ bin/pip install -E ./ -r path/to/requirements.txt   
+    --./表示当前虚拟环境目录,或者  去掉 -E ./ 也可：bin/pip install -r path/to/requirements.txt
+
+
+========pinax具有以下特点：
+    支持openid；
+    支持email验证；
+    密码管理；
+    站点声明；
+    用户短消息；
+    朋友邀请，包括站内邀请和站外邀请；
+    一个基本的twitter应用集成；
+    群组功能，tribes
+    project协同工作；
+    讨论；
+    wiki功能；
+    blog功能；
+    书签功能；
+    tag功能；
+    contact import；
+    投票系统；
+    图片管理。
+
+＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝pinax目录结构：
+1、mysite是项目目录，这里面存放的是这个新建项目的相关配置文件以及模板，而mysite-env才是pinax的目录。因此，做具体的二次开发时候，实际上很多的情况我们所需要修改的文件都在mysite-env/lib/pythonxx/site-packages/pinax目录下，而并不是您的项目目录，当然您也可以重载这些。
+
+2、pinax最新的是0.9x版本，默认的语言包文件并没有中文，我们需要自己来make中文语言包。至于怎么生成中文语言配置文件django.po以及怎么编译成django.mo请直接百度或者google参考django相关教程。我这里只是需要提醒大家，在翻译pinax语言包的时候需要注意：您除了要翻译您的项目下的django.po外，pinax目录内的django.po也必须要翻译，否则你就要郁闷为啥显示的仍旧是英文呢？
+
+3、关于pinax的模板机制。您使用pinax生成的项目目录中的模板并不是全部的模板，其中很大一部分模板并不存在。
+根据django的模板机制，当项目模板目录找不到请求的模板时，会自动去pinax目录寻找。
+因此，在修改模板的时候请自己在项目目录下补全所缺少的模板，或者直接去pinax目录修改相关模板
+
+4、关于中文，pinax毕竟是老外的系统，对于中文的支持并不算是很好。所以很多的应用中文的地方，需要各位自行的进行修改，比如wiki、tag之类的，默认的url规则并不支持中文的slug，所以一定要进行修改。而修改的地方也在pinax目录，找到相应的app目录，然后修改setting。
+
+5、二次开发建议，pinax项目的初衷或者说思路就是构建一个开源的基于django app的sns应用框架，或者说应用脚手架。因此，在建立项目的时候建议使用pinax-admin setup_project -b social mysite2 类似的，生成social项目。因为本身social项目的名称应该就是complete project,他已经最大包含了pinax的app，我们从这个项目入手会省去很多的工作。
+
+6、关于wiki，很多朋友都问我pinax说支持wiki，可是看完了官方文档后仍旧找不到wiki在哪里，到底怎么使用wiki?其实，pinax使用的wiki是名为wakawak的django app，在social项目中已经包含了。我们只需要在项目的urls.py中给它添加相应的url规则并修改base模板，添加menu就可以了。具体修改urls.py,只需要在urlpatterns中添加， url(r"^wiki/", include("wakawaka.urls")),即可。当然，这里会使用它默认的url规则：WIKI_SLUG = r'((([A-Z]+[a-z]+){2,})(/([A-Z]+[a-z]+){2,})*)'，只支持类似TryIt之类的slug，所以请根据实际需要去pinax目录下wakawak app目录中修改setting。
+
+7、还有一些朋友遇到了比如添加了中文包了，也修改了setting文件，但是仍旧不显示中文的情况。这时我建议各位遇到此类问题的朋友先要确保您的配置文件有正确的书写，比如LANGUAGE_CODE = "zh_CN",就千万别写成LANGUAGE_CODE = "zh-CN"，否则那就郁闷了。如果确认后仍旧出现问题，则不妨在setting中这样来写
+
+ugettext = lambda s: s
+
+LANGUAGES = [
+
+    ("zh_CN", u"Chinese"),
+
+    ("en", u"English")
+
+]
+
+然后重启开发服务器，选择English，然后在切换回Chinese，这时应该会解决仍旧显示中文的问题。
+
+ 
+8、如何部署二次开发的pinax，使用buildout命令，生成发行包，然后通过发行包来进行部署。
+
+
+＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝制作app的工作流程
+    1.设计models，编辑 models.py，修改settings安装app，syncdb确保设计没有语法错误。
+    2.编辑 admin.py，进入admin 测试 models。
+    3.规划 url，编辑 urls.py，将所有 urls 映射到不存在的 views。
+    4.创建 views，所有 views 的内容都使用临时的HttpResponse。
+    5.制作app的首页(逻辑顶层)的模板，模板内制作指向各个view 的 url。实验。
+    6.按照逻辑顺序一个一个地填充各个 view 的逻辑、模板。
+    7.在 view 的逻辑需要的时候设计 forms，修改 forms.py。
+
+========================================Django Projects (项目)推荐的布局
+example.com/
+   README
+   settings.py
+   urls.py
+   docs/
+       This will hold the documentation for your project
+   static/
+       -In production this will be the root of your MEDIA_URL
+       css/
+       js/
+       images/
+   tests/
+       - Project level tests (Each app should also have tests)
+   uploads/
+       - content imgs, etc
+   templates/
+       - This area is used to override templates from your reusable apps
+       flatpages/
+       comments/
+       example/
+       app1/
+       app2/
+
+===========================================如何用eclipse+pydev调试django应用
+
+2010-03-14 13:28
+
+1、如何才能通过pydev启动django应用，并且设置断点调试呢？
+
+参考pydev creator的文章《Configuring pydev to work with django》
+
+总结一下就是：django应用的runserver命令会启动两个进程，这是实现auto reload的关键，也是无法设置断点、向cmd打印log的根源，所以runserver加入--noreload参数即可。
+
+不过，问题又来了。这样做导致auto reload功能失去，每次修改源码都要重启服务器。
+
+2、如何保证auto reload的前提下用pydev调试django应用呢？
+
+参考一位老兄的文章《How to debug django web application with autoreload》
+
+总结一下，就是用remote debugger，并且在manage.py中增加一些代码。
+
+然后选择右上角的open Perspective选择other->Pydev
+
+========================================配置Eclipse下的Django开发环境
+安装方法是:
+help->softupdate->addsite填入： http://sourceforge.net/projects/pydev/
+也可下载aptana IDE
+
+1.建立PyDev Project
+
+Eclipse IDE－》File－》New－》Other－》Pydev－》选择Pydev Project－》起一个项目的名称（例如demo）－》选择路径，如d:\workspace－》选择适合你的Python版本（我的是2.6）－》将下面的勾去掉，不要建立src文件－》Finish
+
+2.把生成的Django项目目录拷贝到Eclipse刚刚建立的项目下的目录里。回到刚才的Elicpse IDE－》在PyDev Package视图中右键单击新建的项目，从弹出的菜单中选择“Refresh”，即可看到Django的项目工程。添加、删除文件和目录的操作都可以通过右键菜单来完成
+
+3.右键单击PyDev项目－》properties－》选择PyDev-PYTHONPATH－》add Source folder 把你复制进去的项目添加—>确定
+
+4. 对Pydev项目进行配置,配置这样就可以直接和运行tomcat一样启动：选择Pydev的项目名称－》Run菜单－run Configurations－》Python Run－》右键New－》在Main面板中写入项目名称，通过Browse载入项目名称和Main Module，Main Module选择manage.py－》在Augement面板中,argument必须是 runserver --noreload，下面的working directory加入你的base directory。
+
+这样启动时就可以直接点run来运行了
+
+=====================================my Eclipse virtualenv setup:
+1. create a new Pydev project named mysite（最好是用mysite名字，因settings配置里默认用该名）
+2. import filesystem from /home/junn/Release/pinax/mysite/ into the new mysite  --该pinax/mysite由安装pinax时产生，这里主要是要其产生的django标准目录结构
+3. Choose python interpreter: /home/junn/Release/pinax/bin/python
+4. 在PYTHONPATH选项里，添加Source Folder为project根
+5. PYTHONPATH选项里，添加External Libraries:  (不是必须的)
+    /home/junn/Release/pinax/lib
+    /home/junn/Release/pinax/include  
+6. Run:
+    new a python Run-->choose project-->Main Module-->add program arguments
+
+The key in all steps:
+1. Choose python interpreter: /home/junn/Release/pinax/bin/python （由该设置会自动读取相关lib/include）
+2. new Pydev project 命名为: mysite
+3. import /home/junn/Release/pinax/mysite/ into the new mysite, not from /home/junn/Release/pinax
+3. Run的设置：
+ 
+==============================Pinax中文化步骤：
+1. use translation strings in Python code and templates
+    
+
+2.create language files
+    mysite$ django-admin.py makemessages -l zh_CN    --if error, create locale dir
+    mysite$ mkdir locale
+    mysite$ django-admin.py makemessages -l zh_CN -v2
+
+3. translate the file: mysite/locale/zh_CN/LC_MESSAGES/django.po  
+    #: forms.py:25
+    msgid "There is already this book in the library."
+    msgstr "库里已有该书."
+
+    #: models.py:16
+    msgid "title"
+    msgstr "标题"
+
+    #: models.py:17
+    msgid "publisher"
+    msgstr "出版社"
+
+4. Compiling the language files
+    mysite$ django-admin.py compilemessages
+
+    Remember to restart the development server every time you compile the messages, so do it now
+
+5. change settings
+open the settings.py file and make sure you have the following settings:
+    USE_I18N = True
+    ...
+    ugettext = lambda s: s
+    LANGUAGES = (
+            ('en', u'English'),
+            ('zh', u'Chinese'),
+)
+
+
+注意：以下(eclipse)工程結构中,针对项目properties-->PYTHONPATH-->Add source folder 时，应添加/mysite/apps, 而不是添加/mysite/apps/about/, /mysite/apps/diary等子目录。否则，会报找不到相应model错误
+mysite/
+    apps/
+        about/
+        diary/
+        profiles/
+    templates/
+
+===========================Pinax 已有设计：
+profile<-->user :  通过user_id(PK, auto生成）产生关联
+
+
+=====================django model
+Diary:
+    property = models.ForeignKey(DiaryProperty)
+
+    --关联关系需在关联的一端维护即可，如上不需要在DiaryProperty里也添加对Diary对象的引用。
+        由DiaryProperty对象获取Diary对象可用： property.diary_set.all()  --其中diary_set属性为Django框架自动添加
+        property.diary_set是一个Manager类，返回一个QuerySet
+
+ForeignKey(one-to-many), ManyToManyField and OneToOneField require the first argument to be a model class,
+so use the verbose_name keyword argument:
+    poll = models.ForeignKey(Poll, verbose_name="the related poll")
+    sites = models.ManyToManyField(Site, verbose_name="list of sites")
+    place = models.OneToOneField(Place, verbose_name="related place")
+    ---verbose_name作为描述说明字串
+
+    book.authors.all()   ---authors为book Model 的ManyToManyField属性
+    book.authors.add(author)
+    author.book_set.all()  
+
+Many-to-one relationships:
+    class Manufacturer(models.Model):
+        # ...
+
+    class Car(models.Model):
+        manufacturer = models.ForeignKey(Manufacturer)
+一个制造商会造多辆汽车，但一辆汽车只会有一个制造商，典型一对多关系，所以用ForeignKey
+
+class Profile(Model):
+    carer = ManyToManyField(Profile, ralated_name="carer")
+
+多对多，一对多：
+http://www.onepub.net/2012/03/01/django-%E4%B8%AD%E5%85%B3%E8%81%94%E5%AF%B9%E8%B1%A1%E7%9A%84%E6%9F%A5%E6%89%BE%E6%96%B9%E6%B3%95/
+在一对多或者多对多中类似entry_set这样的属性字段，我们并没有在模型类中定义，Django是怎么知道的？答案就在于settings.py中的INSTALLED_APPS 设置。
+Django在启动时会检查所有这里定义的应用程序，然后给应用程序中的模型类将来关联，如果存在关联关系的就自动加上类似entry_set这样的方法。
+
+＝＝＝＝＝＝＝＝＝＝＝更新模型步骤（开发环境）：
+1. add properties in model
+2. > python manage.py sqlall diary   --查看CREATE TABLE语句
+3. 访问DB，添加新字段： alter table 语句 --可选用 manage.py dbshell直接调用DB客户端
+4. > python manage.py shell --由此导入model和选中表单（Diary.objects.all()）验证新字段是否被添加
+
+在产品服务器上：
+1.启动DB交互界面
+2.执行开发环境中的 step 3: alter
+3.将新字段添加到模型中－－指在生产环境中更新代码
+4.重启web server
+
+===add column
+ALTER TABLE books_book ADD COLUMN num_pages integer;
+UPDATE books_book SET num_pages=0;
+ALTER TABLE books_book ALTER COLUMN num_pages SET NOT NULL;
+ALTER TABLE t_diary modify COLUMN title varchar(500);   ----修改字段长度
+
+
+===删除字段
+1.从model中删除字段，重启Web Server
+2.alter table books_book drop column num_pages; 
+
+===删除多对多关联
+1.模型中删除ManyToManyField
+2.drop table books_book_author;  --删除表
+
+=====django默认是级联删除
+即 diary-comment: 1-多
+   comment-reply: 1-多
+当删除一个diary后，与其关联的comment会全部被删除，与comment关联的reply也全部被删除
+----也即，django通过ForeignKey关联的的驻留对象会被自动删除，如下Comment类对象被删除：
+    class Comment(models.Model):
+        diary = models.ForeignKey(Diary)
+        ...
+
+＝＝＝＝django form:
+cleaned_email()---方法
+Django的form系统自动寻找匹配的函数方法,该方法名称以clean_开头,并以字段名称结束。 如果有这样的
+方法,它将在校验时被调用。
+   如果一个Form实体的数据是合法的,它就会有一个可用的cleaned_data属性。 这是一个包含干净的提交
+数据的字典。 Django的form框架不但校验数据,它还会把它们转换成相应的Python类型数据,这叫做清理数
+据。
+
+class ContactForm(forms.Form):
+    subject = forms.CharField(max_length=100)
+    email = forms.EmailField(required=False)
+    message = forms.CharField(widget=forms.Textarea)
+    def clean_message(self):
+        message = self.cleaned_data['message']
+        num_words = len(message.split())
+        if num_words < 4:
+            raise forms.ValidationError("Not enough words!")
+        return message
+
+特别地,clean_message()方法将在指定字段的默认校验逻辑执行* 之后* 被调用。(本例中,在必
+填CharField这个校验逻辑之后。)因为字段数据已经被部分处理,所以它被从self.cleaned_data中提取出来
+了。同样,我们不必担心数据是否为空,因为它已经被校验过了。
+
+_("")  ---是声明一个字符串吗？
+
+
+form 中 def clean(self)什么时候被执行？
+
+form 的 __init__ 方法与 clean_xxx 哪个先执行？
+
+
+======HTML标签
+<label for="">  --值为元素id,指出当前文本标签与哪个元素关联
+
+========questions?
+1. reverse(settings.SIGNUP_REDIRECT_URLNAME) 该方法用于做什么？
+
+from django.contrib.auth.decorators import login_required
+from django.views.generic.date_based import object_detail
+@login_required
+def my_view(request):
+
+=====装饰器用法
+# 设置图片前,保存已输入profile信息
+def pre_hello(func):
+    def hello(request, **kwargs):
+        print "dddd"
+        #other code
+        return func
+    
+    return hello
+
+@pre_hello
+def world():
+    print "world"
+
+{{ string|wordwrap:"75" }}在指定长度将文字换行。
+---装饰函数的参数只有一个函数名：如func
+
+
+{{ diary.created_date|date:"Y-m-d  H:i:s" }}－－date:后不能加空格
+<a href="{% url profile_detail user.username %}">  －－给url传参数在页面上
+    url(r"^profile/(?P<username>[\w\._-]+)/$",
+
+获取form属性值看来必须得： form_p.cleaned_data["is_commentAllowed"]  ---cleaned_data[]形式
+
+return render_to_response(template_name, RequestContext(request, {"form": form,}))
+    ----RequestContext 若替换成 Context会找不到css样式文件（或许因为上下文设置丢失了）
+
+
+===python类对象的构造时机
+class CreateDiaryForm(forms.Form):
+    title = forms.CharField(max_length=120, required=False,
+                            widget=forms.TextInput(attrs={"id":"blog-title"}))
+    content = forms.CharField(min_length=10, max_length=16000, required=False,
+                              widget=forms.Textarea(attrs={"id": "blog-content",}), )
+    book_choices = []    
+    books = DiaryBook.objects.all()
+    for book_ in books:
+        book_choices.append([str(book_.id), book_.name])
+
+    def __init__(self, *args, **kwargs):
+        super(CreateDiaryForm, self).__init__(*args, **kwargs)
+
+以上类中代码在import CreateDiaryForm 时被执行，而非类的对象构造时被执行。类的__init__方法在对象实例化时被调用。
+
+＝＝＝＝＝NEXT
+1.复习Request请求参数用法
+
+
+=={% url 用法
+{% url path.to.view arg arg2 as the_url %}
+<a href="{{ the_url }}">I'm linking to {{ the_url }}</a>
+This {% url ... as var %} syntax will not cause an error if the view is missing. In practice you'll use this to link to views that are optional:
+
+class BookForm(forms.Form):
+    name = forms.CharField(max_length=100)
+    authors = forms.ModelMultipleChoiceField(queryset=Author.objects.all())
+
+
+python manage.py validate  --检查model語法和逻辑是否正确
+python中的可变参数。*args表示任何多个无名参数，它是一个tuple；**kwargs表示关键字参数，它是一个 dict。并且同时使用*args和**kwargs时，必须*args参数列要在**kwargs前，像foo(a=1, b='2', c=3, a', 1, None, )这样调用的话，会提示语法错误“SyntaxError: non-keyword arg after keyword arg”。
+
+
+Django内置了一个特殊的forloop模板变量
+
+    forloop.counter：表示当前循环的次数，从1开始计数；而forloop.counter0则从0开始计数
+    forloop.revcounter：表示循环中剩余项的个数，循环开始时为循环项总数，最后一次循环置1；而forloop.revcounter0在循环开始时为循环项总数减1，最后一次循环置0
+    forloop.first：布尔值，执行第一次循环时为True
+    forloop.last：布尔值，执行最后一次循环时为True
+    forloop.parentloop：引用上一层循环的对象
+
+forloop变量仅能在循环中使用，一旦脱离{% endfor %}标签就不可访问了
+
+===javascript
+{% block js %}
+function setup() {
+    var ispublic = document.getElementById("ispublic").checked
+    alert(ispublic)
+    var commentallowed = document.getElementById("commentallowed").checked
+    document.getElementById("only").checked = ispublic
+    document.getElementById("not-allow").checked = commentallowed
+}
+
+=====django 代码里写中文解决办法：
+统一用utf-8,
+在views或models最顶上加入下面这行代码：
+# -*-coding:utf-8 -*-       ----注意，该应原样加入
+#coding=utf-8
+
+＝＝＝＝＝＝Meta
+Django 模型类的Meta是一个内部类。用于定义一些Django模型类的行为特性
+    class Meta:
+        abstract=True
+定义当前的模型类是不是一个抽象类。
+erbose_name： 给你的模型类起一个更可读的名字：
+
+＝＝＝install PIL ImageField image lib:
+download it from : http://www.pythonware.com/products/pil/
+$ tar xvfz Imaging-1.1.7.tar.gz
+$ cd Imaging-1.1.7
+$ python setup.py install
+
+
+
+
+=====
+First of all, post_save.connect(save_profile, User) shouldn't live inside save_profile function's definition. It should be a statement on the same level as save_profile function's definition. Douban screwed up indents. So you probably got the wrong impression.
+
+Secondly, post_save.connect(save_profile, User) per se won't trigger a save event. As the name suggests, signal is like a listener that is waiting for something to happen. In this case, what post_save.connect(save_profile, User) means is this: create a listener on User model, after any User instance is saved, send a signal to save_profile function so that this function can be triggered. So if you want to test if the signal is waiting, you should create an instance of User and save it.
+
+class OrderStatusForm(forms.Form):
+    os = Order_Status.objects.values_list('id', 'status')
+    status = forms.ChoiceField(choices=os, widget=forms.RadioSelect())
+
+def makeForm():
+    newForm = OrderStatusForm()
+    # next line disables all radio buttons.
+    newForm.fields['status'].widget.attrs['disabled'] = True
+
+#    province = forms.ChoiceField(
+#        choices = [],
+#        widget = forms.Select(attrs={'onchange':'initCities(province);'})
+#    )
+
+===RadioSelect
+{% for radio in myform.beatles %}
+    <label>
+        {{ radio.choice_label }}
+        <span class="radio">{{ radio.tag }}</span>
+    </label>
+{% endfor %}
+
+results in :
+<label>
+    John
+    <span class="radio"><input type="radio" name="beatles" value="john" /></span>
+</label>
+<label>
+    Paul
+    <span class="radio"><input type="radio" name="beatles" value="paul" /></span>
+</label>
+
+# customize radio render added by junn
+class SimpleRadioFieldRenderer(forms.widgets.RadioFieldRenderer):
+    def render(self):
+        """Outputs widget without <ul> or <li> tags."""
+#        return mark_safe(u'\n'.join([u'%s<label%s>%s</label>' %
+#            force_unicode(w.tag(), w.label_for, w.choice_label) for w in self]))
+
+#        return mark_safe(u''.join([u'%s<label>%s</label>\n' %
+#            (w.tag(), w.choice_label) for w in self]))
+        
+        return mark_safe(u'\n'.join([u'%s%s' %
+            (w.tag(), force_unicode(w.choice_label)) for w in self]))
+
+=====how to add message
+if request.method == "POST":
+    form = ProfileForm(request.POST)
+    if form.is_valid():
+        profile = form.save(request.user)
+        messages.add_message(request, messages.SUCCESS,
+            ugettext(u"更新设置成功.%(profile)s" % {"profile": profile})
+        )
+        return render_to_response(
+            PROFILE_SET_SUCCESS,
+            RequestContext(request, {"profile": profile,})
+        )
+
+页面上输出的profile是其__unicode__函数执行結果
+
+关键字参数 对比 位置参数:
+    在关键字参数调用中,你要指定参数的名字和传入的值。 在位置参数调用中,你只需传入参数,不需要明确指明哪个参数与
+    哪个值对应,它们的对应关系隐含在参数的顺序中。
+    命名的正则表达式组的语法是 :
+    (?P<name>pattern) ,这里 name 是组的名字,而pattern 是匹配的某个模式。
+    如：(r'^articles/(?P<year>\d{4})/(?P<month>\d{2})/$', views.month_archive),
+        (r'^mydata/(?P<id>\d+)/$', views.my_view, {'id': 3}),
+    位置参数：
+    (r'^articles/(\d{4})/(\d{2})/$', views.month_archive),
+
+url里配置  /(\w+)/ 形式参数中不能处理email地址，如 xxx@qq.com，将导致不匹配
+
+请求 /articles/2006/03/ 将会等同于这样的函数调用:
+    month_archive(request, '2006', '03')
+
+带命名组,同样的请求就会变成这样的函数调用:
+    month_archive(request, year='2006', month='03')
+
+    可以混合关键字和位置参数,只要所有的位置参数列在关键字参数之前。
+  如:sell('Socks', quantity=6, price='$2.50')
+
+===
+    {% if request.user.is_authenticated %}
+        <div><a href="{% url acct_logout %}?next={{ request.path }}">logout</a></div>
+    {% endif %}
+
+url配置中，如果是必须传的参数，则考虑用 {% url diary_edit id %} 形式，若可选的考虑用?查询参数
+
+what's this?
+    User.objects.filter(email__iexact=email):
+
+当使用 RequestContext 时, 当前用户 (是一个 User 实例或一个 AnonymousUser 实例) 存储在模板变量
+{{ user }} 中:  ---so user is a template var，
+用户的权限信息存储在 {{ perms }} 模板变量中
+
+==消息
+要创建一条新的消息,使用 user.message_set.create(message='message_text') 。
+要获得/删除消息,使用 user.get_and_delete_messages()
+
+request.META 是一个Python字典,包含了所有本次HTTP请求的Header信息
+HTTP_REFERER ,进站前链接网页
+HTTP_USER_AGENT  
+
+       当我们提交表单仅仅需要获取数据时就可以用GET; 而当我们提交表单时需要更改服务器数据
+的状态,或者说发送e-mail,或者其他不仅仅是获取并显示数据的时候就使用POST。
+我们应每次都给成功的POST请求做重定向。 这就是web开发的最佳实践。
+
+为何重定向至新的页面,而不是在模板中直接调用render_to_response()来输出？
+原因就是: 若用户刷新一个包含POST表单的页面,那么请求将会重新发送造成重复。 这通常会造成非期望
+的结果,比如说重复的数据库记录;
+
+   若要使用send_mail()函数来发送邮件,那么服务器需要配置成能够对外发送邮件,并且在Django中
+设置出站服务器地址
+
+======HttpResponseRedirect重定向用法：
+    from django.http import HttpResponseRedirect:
+    
+    return HttpResponseRedirect(reverse('diary_bookcontent', args=[diary.book.id]))
+    ---reverse(url_name, args=[params_list]), params_list位置参数
+重定向解决了某请求成功后，用render_to_response转到别的页面，Browser地址栏url无变化的问题，
+造成后续请求错误，如createDiary后续要进入book_content页进行分页。
+   关键问题：什么时候该用render_to_response?什么时候该用HttpResponseRedirect？
+
+还有如下几种形式：
+    return HttpResponseRedirect('/classroom/notamember/%s/' % classname)
+
+    from django.core.urlresolvers import reverse
+    url = reverse('notamember', kwargs={'classname': classname})
+    return HttpResponseRedirect(url)
+   
+
+    
+
+==send email:
+from django.core.mail import send_mail
+send_mail(
+    request.POST['subject'],
+    request.POST['message'],
+    request.POST.get('email', 'noreply@example.com'),
+    ['siteowner@example.com'],
+)
+
+===
+创建 RequestContext 和 context处理器
+from django.template import loader, RequestContext
+def custom_proc(request):
+    "A context processor that provides 'app', 'user' and 'ip_address'."
+    return {
+        'app': 'My app',
+        'user': request.user,
+        'ip_address': request.META['REMOTE_ADDR']
+    }
+def view_1(request):
+    # ...
+    t = loader.get_template('template1.html')
+    c = RequestContext(request, {'message': 'I am view 1.'},
+             processors=[custom_proc])
+    return t.render(c)
+
+TEMPLATE_CONTEXT_PROCESSORS 指定了哪些context processors 总是默认被使用.如下：
+    django.core.context_processors.auth
+        user
+        messages
+        perms
+    django.core.context_processors.debug
+        sql_queries
+        debug
+    django.core.context_processors.request
+
+=====include tag  pass parameters:(include标签传递参数)
+    http://djangosnippets.org/snippets/11/
+How to use it
+
+test_call.html
+
+{% expr "limodou" as name %}
+{% call "test/test_sub.html" with "a"|capfirst "b" title="title1" %}<br/>
+{% call "test/test_sub.html" with "c" "d" title="title2" %}
+
+expr is also a custom tag written by me. It'll calculate a python expression and save to result to a variable. In this case, the variable it "name".
+
+{% call "aboutuser.html" with "mypage.html" %}
+{% call "aboutuser.html" with "ones_home.html" %}
+
+mysql 插入时间: now()
+
+＝＝＝＝＝传言url tag 不能传递一个对象
+http://stackoverflow.com/questions/4447522/django-passing-model-object-values-through-url
+The issue is that you can't pass an object in a URL, you can only pass characters.
+
+一个model允许有多个ForeignKey，但定义同一个ForeignKey类型的各属性需要修改为不同的related_name
+
+从settings文件得到model名：
+    get_profile_model().objects.get_or_create(user=instance)
+
+===登录时发送信号：
+def perform_login(request, user):
+    user_logged_in.send(sender=user.__class__, request=request, user=user)
+    login(request, user)
+
+def additional_info_kickstart(sender, **kwargs):
+    request = kwargs.get("request")
+    request.session["idios_additional_info_kickstart"] = True
+if user_logged_in: # protect against Pinax not being available
+    user_logged_in.connect(additional_info_kickstart)
+
+##@receiver(signal, sender=User)  
+   signal: like user_logged_in, email_confirmed,...
+   sender: from this class     
+        The sender to which the receiver should respond. Must either be
+        of type Signal, or None to receive events from any sender.
+
+可以考虑建立signals.py模块，
+
+====django中的signals
+Model signals:
+    pre_init
+    post_init
+    pre_save
+    post_save
+    pre_delete
+    post_delete
+    class_prepared
+
+Management signals:
+    post_syncdb
+
+Request/response signals:
+    request_started
+    request_finished
+    got_request_exception
+
+Test signals:
+    template_rendered
+
+可能的应用场景:
+    如果一个操作可能会触发多个后续事件, 此时使用signals会非常方便.
+    具体场景:
+        sns中的事件通知, 如用户发表了一篇博文, 然后通知所有的好友
+        用户信息的更改的邮件通知
+        用户订制信息的邮件通知等
+
+    
+    
+
+
+
+
+
+hasattr(self, '_profile_cache'):  ---对象是否有某属性
+
+=====================template中直接访问session
+在template中调用session用：{{ request.session.username }}，
+view中调用的方法:myname = request.session['username']
+
+python django可以动态扩展属性 ？ YES
+
+profile = Profile.objects.get(user=user)  ==该方法无法获取到profile,似乎get()应传入id
+profile, created = get_profile_model().objects.get_or_create(user=user) ==该方法可以得到profile
+
+#原始的Pinax中的idios/models.py里有如下自动创建profile的函数，我把它注释了
+def create_profile(sender, instance=None, **kwargs):
+    if instance is None:
+        return
+    profile, created = get_profile_model().objects.get_or_create(user=instance)
+post_save.connect(create_profile, sender=User)
+
+
+create database
+cd $mysite
+python manage.py syncdb
+
+#coding=utf-8
+
+python文件操作：
+import os
+os.path.isfile('a.txt') #如果不存在就返回False
+os.path.exists(directory) #如果目录不存在就返回False
+
+form 在代码里需要通过这样的形式初始化：
+self.fields["name"].initial = p.name
+self.fields["website"].initial = p.website
+self.fields["sex"].initial = p.sex
+self.fields["about"].initial = p.about
+
+－－切图jquery用法
+http://www.cnblogs.com/boychenney/archive/2011/10/08/2201996.html
+
+<script>
+function preview(img, selection) {
+    if (!selection.width || !selection.height)
+        return;
+    
+    var scaleX = 64 / selection.width;      －－当selection.width小于64时，这个因子起放大作用，反之起缩小作用。
+    var scaleY = 64 / selection.height;
+    
+    $('#preview img').css({
+        width: Math.round(scaleX * 128),    --width, height为大图的实际宽高,若这里设置与大图设置不一样，会造成小图的偏差
+        height: Math.round(scaleY * 128),   --取得大图实际宽高可用：
+                                            --var image = new Image();
+                                            --image.src = $("#"+img_id).attr("src");                    
+                                            -- image.width;image.heigth;            
+        marginLeft: -Math.round(scaleX * selection.x1),
+        marginTop: -Math.round(scaleY * selection.y1)
+    });
+    
+    $('#id_x1').val(selection.x1);
+    $('#id_y1').val(selection.y1);
+    $('#id_x2').val(selection.x2);
+    $('#id_y2').val(selection.y2);
+    $('#id_w').val(selection.width);
+    $('#id_h').val(selection.height);
+}
+</script>
+
+$(function (){
+    $('#photo').imgAreaSelect({
+        aspectRatio: '1:1',         －－选择框宽高比率
+        handles: true,
+        fadeSpeed: 200,
+        minHeight:48,               －－选择框最小可调整到的值
+        minWidth:48,
+        onSelectChange: preview,
+        x1: 10,                     －－初始选中的区域坐标
+        y1: 10,
+        x2: 110,
+        y2: 110
+    });
+});
+
+<div style="width: 64px; height: 64px; overflow: hidden;" id="preview">
+    <img style="width: 128px; height: 128px; margin-left: -32px; margin-top: -32px;" src="{{ STATIC_URL }}/img/{{profile.pic}}" />
+</div>   －－中图margin-left: -32px; margin-top: -32px;决定了显示内容区域是否与大图选中区域一致。
+
+值得注意的是：
+
+   回调函数中实际图的宽高 回调函数中新图的宽高
+   这些参数必须设置正确、否则会出现 选择偏差
+
+img.size[0] －－width
+img.size[1] --height
+
+＝＝＝＝＝以下被settings.py配置，所以MEDIA_URL,STATIC_URL等可以直接在模板页面使用
+TEMPLATE_CONTEXT_PROCESSORS = [
+"django.core.context_processors.media",
+"staticfiles.context_processors.static",
+]
+
+================================================================
+<!--原图-->
+<dl><dt>
+<div class="frame">
+    <img src="{{ MEDIA_URL }}/img/{{profile.pic}}" id="photo"/>
+</div></dt>
+<dd>大</dd>
+</dl>
+
+<!--中图-->
+<dl><dt>
+<div style="width: {{P_NORMAL_W}}px; height: {{P_NORMAL_H}}px; overflow: hidden;" id="preview">
+    <img style="width: {{P_NORMAL_W}}px; height: {{P_NORMAL_H}}px;" src="{{ MEDIA_URL }}/img/{{profile.pic}}" />
+</div></dt>
+<dd>中</dd>
+</dl>
+
+<!--小图-->
+<dl><dt>
+<div style="width: {{P_SMALL_W}}px; height: {{P_SMALL_H}}px; overflow: hidden;" id="preview">
+    <img style="width: {{P_SMALL_W}}px; height: {{P_SMALL_H}}px;" src="{{ MEDIA_URL }}/img/{{profile.pic}}" />
+</div></dt>
+<dd>小</dd>
+</dl>
+================================================================
+
+＝＝＝异常
+使用不存在的字典关键字将引发 KeyError 异常。
+搜索列表中不存在的值将引发 ValueError 异常。
+调用不存在的方法将引发 AttributeError 异常。
+引用不存在的变量将引发 NameError 异常。
+未强制转换就混和数据类型将引发 TypeError 异常。
+
+try:  
+ 
+   f = open(“file.txt”,”r”)  
+except IOError, e:  
+   print e  
+
+--全局异常函数
+def trace_back():  
+    """ print exception stack """
+    try:  
+        return traceback.print_exc()  
+    except:  
+        return ''
+
+raise [exception[,data]] ---手工扔出异常
+
+4. 采用sys模块回溯最后的异常
+
+    import sys  
+    try:  
+       block  
+    except:  
+       info=sys.exc_info()  
+       print info[0],":",info[1]
+
+----简单处理异常
+try:  
+    1/0  
+except:  
+    print "do something..."
+
+---finally
+    >>> try:  
+    ...     1/0  
+    ... finally:  
+    ...     print "I just finally do something ,eg: clear!"
+
+用  {% url profiles_uncare taProfile.id %}?next={{request.path}}"  
+   ---?next=xxxx  形式可以避免许多NoReverseMatch异常
+
+<a onclick="alertDelete();" href="{% url diary_delete detailDiary.id %}">删除</a>
+    －－为什么无论alertDelete() true or false, 都执行了delete 操作？
+
+====若链接点击后仍在render到当前模板，则以下两者等价
+<a href="{% url welcome %}?pageNo={{ latestDiaries.previous_page_number }}" title="Pre">上一页</a>
+ -- <a href="?pageNo={{ latestDiaries.previous_page_number }}" title="Pre">上一页</a>
+
+<a href="#" onclick="requestPageData({{latestDiaries.previous_page_number}});" title="Pre">上一页</a>
+－－这里必须要 href="#",否则 view中request.is_ajax()总返回False
+
+====ajax请求
+function requestPageData(pageNumber) {  
+    $.get("{{request.path}}",
+    {"page": pageNumber, "isAjax": "1"},
+    function(data) {
+        if(data.status == "success") {
+            //alert(data.html)
+            $("#latest-diaries").empty();  //清空
+            $("#latest-diaries").append(data.html); //填充
+            //alert($("#latest-diaries").val());
+    　　 } else {
+            alert(data.status);
+    　　 }
+    },
+    "json");
+}
+
+-----view中必须用RequestContext，否则一些环境变量无法得到
+if request.is_ajax():
+t = get_template("diary/includes/latest_diaries.html")
+html = t.render(RequestContext(request, {
+           'latestDiaries':paging.getPageDataList(pageNo),
+           "pageRange": paging.getPageRange(pageNo),
+           }))
+results = {
+    "status":"success",
+    "html": html,
+}
+return HttpResponse(simplejson.dumps(results))
+
+＝＝＝＝Aptana修改默认工作区
+打开/usr/dev/Aptana3/configuration/config.ini文件：
+修改配置： osgi.instance.area.default=@user.home/work/python
+
+＝＝＝ajax POST请求403异常解决：
+"POST /diary/delete_comment/ HTTP/1.1" 403 2332
+    －－view 函数添加@csrf_exempt注解
+    from django.views.decorators.csrf import csrf_exempt
+
+==========django 转义 escape
+{{ content|safe }}  --打开转义。 去掉safe时，django默认是取消转义
+{{ content|linebreaks }}  －－显示换行
+
+{{ content|urlize }}  --链接可点击
+
+=======静态文件（static)配置
+用户上传的静态文件：MEDIA_ROOT/MEDIA_URL
+    place static assets in MEDIA_ROOT along with user-uploaded files, and serve them both at MEDIA_URL.
+
+(MEDIA_ROOT/MEDIA_URL需要与STATIC_ROOT/STATIC_URL有不同的设置)
+you need to make your MEDIA_ROOT and MEDIA_URL different from your STATIC_ROOT and STATIC_URL. 8
+
+－－－－必须自己设定MEDIA_ROOT处理请求的方式，staticfiles不处理用户上传的静态文件。
+－－－方法是：使用 django.views.static.serve() view  在urlconf里配置
+You will need to arrange for serving of files in MEDIA_ROOT yourself;
+staticfiles does not deal with user-uploaded files at all.
+You can, however, use django.views.static.serve() view for serving MEDIA_ROOT in development;
+
+例子：
+# settings.py
+MEDIA_URL = 'medias'
+MEDIA_ROOT = '/home/yangqingchang/branches/yangqingchang/etime/medias/'
+
+# add in urls.py：
+urlpatterns = patterns('',
+    (r'^medias/(?P<path>.*)$', 'django.views.static.serve', {'document_root': settings.MEDIA_ROOT},),
+)
+
+============文件上传权限问题
+现象：请上传一张有效的图片。您所上传的文件不是图片或者是已损坏的图片。
+    检查图片存放的相关目录及权限是否有，server启动账号是否有读写目录权限
+
+============django log 日志
+DEBUG = False, Django will automatically mail a full traceback of any error to each person listed in the ADMINS setting
+Django uses the dictConfig format. like :
+    LOGGING = {
+    //
+    }
+==log levels：
+logger.critical() －－－高级
+logger.error()
+logger.warning()
+logger.info()
+logger.debug()   －－低级
+
+When a message is given to the logger, the log level of the message is compared
+to the log level of the logger. If the log level of the message meets or exceeds
+ the log level of the logger itself, the message will undergo further processing.
+If it doesn’t, the message will be ignored.
+
+======propagate参数：
+'loggers': {
+        'django': {
+            'handlers':['null'],
+            'propagate': True,
+            'level':'INFO',
+        },
+        'django.request': {
+            'handlers': ['mail_admins'],
+            'level': 'ERROR',
+            'propagate': False,
+        },
+        'myproject.custom': {
+            'handlers': ['console', 'mail_admins'],
+            'level': 'INFO',
+            'filters': ['special']
+        }
+    }
+
+    django, which passes all messages at INFO or higher to the null handler.
+    django.request, which passes all ERROR messages to the mail_admins handler.
+        In addition, this logger is marked to not propagate messages. This means
+        that log messages written to django.request will not be handled by the django logger.
+    myproject.custom, which passes all messages at INFO or higher that also pass the special
+        filter to two handlers -- the console, and mail_admins. This means that all INFO
+        level messages (or higher) will be printed to the console; ERROR and CRITICAL messages will also be output via email.
+
+# Get an instance of a specific named logger
+logger = logging.getLogger('project.interesting.stuff')
+    ---the logger name is usually __name__, the name of the python module that contains the logger。
+    project.interesting.stuff为模块名。为一个层次结构：
+    project.interesting logger 是project.interesting.stuff 的父logger。
+    而project logger 是 project.interesting 的父 logger.
+
+    该层次结构，使得logger可以通过设置propagate属性来传播其记录日志行为。
+    因此，默认在project名字空间中定义的logging handler可以捕获所有project.interesting 和
+    project.interesting.stuff loggers 中的日志消息。
+
+    def log_error(func):
+     def _call_func(*args, **argd):
+         try:
+             func(*args, **argd)
+         except:
+             print "error" #substitute your own error handling
+     return _call_func
+
+@log_error
+ def foo(a):
+     raise AttributeError
+
+{{ other.about|default:"&nbsp;" }}  －－为空默认显示空格
+{{ other.about|default:"&amp;nbsp;" }} ---为空默认显示 &nbsp;
+
+
+================服务器架构: gunicorn+nginx+supervisor
+每个worker是一个线程？ 进程。一个主控进程，多个子进程  
+gunicorn只需要启用4–12个workers，就足以每秒钟处理几百甚至上千个请求了。
+推荐的worker数量是：(2 x $num_cores) + 1
+在应用启动之后，然后再通过TTIN和TTOU这两个信号来调整worker数量。
+太多的worker，肯定会在某一个时刻，让你的整个系统急剧降低性能。
+大多数情况下，采用的worker类型是同步方式，也就是说一次仅处理一个请求。
+可用的异步workers，主要是基于greenlets软件包（通过eventlet和gevent）。
+greenlet是用python来实现的协程方式（cooperative multi-threading）。
+    
+==以下情况可以考虑采用异步worker：
+    需要长时间阻塞调用的应用，比如外部的web service
+    直接给internet提供服务
+    流请求和响应（是类似flv流么？）
+    长轮询
+    Web sockets（WebSocket是HTML5规格中的一个非常重要的新特性，它的存在可以允许用户在浏览器中实现双向通信，实现数据的及时推送）
+    Comet（基于 HTTP 长连接的“服务器推”技术，是一种新的 Web 应用架构。基于这种架构开发的应用中，
+    服务器端会主动以异步的方式向客户端程序推送数据，而不需要客户端显式的发出请求。Comet 架构非常适合事件驱动的 Web 应用，以及对交互性和实时性要求很强的应用）
+
+Nginx 既可以在内部直接支持 Rails 和 PHP 程序对外进行服务，也可以支持作为 HTTP代理服务器对外进行服务。Nginx采用C进行编写。
+Instagram技术架构：
+    django+nginx+gunicorn, Feed 以及 Session 信息都用 Redis 处理.
+    缓存使用了 6 个 Memcached 实例
+
+
+
+Entry.objects.extra(where=['id IN (3, 4, 5, 20)'])
+
+
+
+import time
+start = time.time()
+interval = time.time() - start
+
+----点击不会感觉到页面重置 效果如href="##"
+<a href="javascript:requestPage({{ pageItems.next_page_number }});" title="下一页">下一页 &raquo;</a>
+
+====页面脚本注入
+<script> alert("hello!"); </script>  简单的脚本注入
+
+<script>
+for(var i=0;i<999999;i++) {
+    $.get("http://www.guokr.com/site/crime/");
+}
+</script>
+
+<script>
+for(var i=0;i<3;i++) {
+    alert("hello");                  
+    $.get("http://www.guokr.com/site/crime/");
+}
+</script>
+
+====Django POST Forbidden (403) - CSRF cookie not set
+@csrf_exempt
+这是暂时关闭了CSRF, 使之不会报错. 还没找到完美的解决办法.
+
+
+The CSRF token cookie is named csrftoken by default, but you can control the cookie name via the CSRF_COOKIE_NAME setting.
+csrf_token在两个地方呈现 :1. 页面dom里 2.cookie里
+
+If your view is not rendering a template containing the csrf_token template tag, Django might not set the CSRF token cookie. (如果模板里没有包含csrf_token tag,Django可能不会设置CSRF token Cookie)
+This is common in cases where forms are dynamically added to the page. To address this case, Django provides a view decorator which forces setting of the cookie: ensure_csrf_cookie().
+确保强制设置cookie.
+
+======what is doctest in django?
+There are two main ways to write tests in Django; doctests and unit tests. Units tests will be familiar to you if you're coming from Java. You basically write new Python code to setup and execute your tests. Doctests are a combination of documentation and unit testing. You actually write executable tests in your comments. 
+
+
+Django 提供了 F() 对象来做这样在比较。 F() 对象查询中可以作为模型字段的 引用，这样就可以在查询中比较同一模型实例中的不同字段了。
+F()
+要查找广播数和评论数之和大于级别的条目可以使用如下查询:
+>>> Entry.objects.filter(rating__lt=F('n_comments') + F('n_pingbacks'))
+
+在 filter() 等语句中的关键字查询参数都是“逻辑与”的关系。如果要进行更复杂的 查询（如条件之间为“逻辑或”的关系），那么可以使用 Q 对象。
+
+01.kwargs = {
+02.# you can set common filter params here
+03.}
+04. 
+05.# will return entries which don't have a deleted_datetime
+06.if exclude_deleted:
+07.kwargs[ 'deleted_datetime__isnull' ] = True
+08. 
+09.# will return entries in a specific category
+10.if category is not None:
+11.kwargs[ 'category' ] = category
+12. 
+13.# will return entries for current user
+14.if current_user_only:
+15.kwargs[ 'user' ] = request.user
+16. 
+17.# will return entries where titles match some search query
+18.if title_search_query != '':
+19. kwargs[ 'title__icontains' ] = title_search_query
+20. 
+21.# apply all filters and fetch entries that match all criteria
+22.entries = Entry.objects.filter( **kwargs )
+
+kwargs = { 'deleted_datetime__isnull': True }
+args = ( Q( title__icontains = 'Foo' ) | Q( title__icontains = 'Bar' ) )
+entries = Entry.objects.filter( *args, **kwargs )
+
+
+=====清理session
+Clearing the session table
+
+If you're using the database backend, note that session data can accumulate in the django_session database table and Django does not provide automatic purging. Therefore, it's your job to purge expired sessions on a regular basis.
+
+To understand this problem, consider what happens when a user uses a session. When a user logs in, Django adds a row to the django_session database table. Django updates this row each time the session data changes. If the user logs out manually, Django deletes the row. But if the user does not log out, the row never gets deleted.
+
+Django provides a sample clean-up script: django-admin.py cleanup. That script deletes any session in the session table whose expire_date is in the past -- but your application may have different requirements.
+
+>> django-admin.py cleanup
+
+=====split models.py into many module files:
+class Province(models.Model):
+    name = models.CharField(max_length=40)
+    desc = models.TextField(max_length=200, null=True, blank=True)
+    
+    class Meta:
+        db_table = 't_province'
+        verbose_name = 'Province'
+        app_label = 'profiles'     #this is needed
+
+
+====django server启动后文件载入顺序：
+    __init__.py
+    settings.py    
+
+====自定义模型字段(db_column)
+from django.db import models
+
+class Author(models.Model):
+    first_name = models.CharField(maxlength=30, db_column='firstname')
+    last_name = models.CharField(maxlength=30, db_column='last')
+
+    def __str__(self):
+        return '%s %s' % (self.first_name, self.last_name)
+
+    class Meta:
+        db_table = 'my_author_table'
+        ordering = ('last_name','first_name')
+
+

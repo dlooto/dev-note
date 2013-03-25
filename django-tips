@@ -1,0 +1,46 @@
+======Django最佳实践tips:
+
+0. SRS整理后，要进行归类，理出优先级，实现难度等
+
+1. view层：业务逻辑要尽量少，尽量只负责控制数据封装，请求转发，调用form或model
+
+2. 离开页面时，保存输入数据流程：
+save data to session   ---when leaving data input page
+get data from session  ---when enter into the page again(initialing form or page)
+clear data from session ---after used at once(like initialized)
+
+在HTML/JS中去控制是否要求登录。
+
+课题：html,js,css等的重用问题？
+
+3.django template什么时候该用extends/include?
+
+我们没有积累，脚步不够稳健，走得太快，技术上没能深入
+
+Aptana的重构(尤其改名)功能要少用
+
+form似乎是鸡肋：样式不好控制，都写在py代码里了
+
+部署发布：前一个版本代码一定要先备份  ！！！
+
+什么时候该用ajax?什么时候不该用ajax?
+ajax请求后，原页面需要更新数据的地方较多，造成处理逻辑复杂，则应考虑换成非ajax方式。
+若仅有限的1－2处更新（剩余大量不需更新），则用ajax请求。
+
+=====工具与替代方案:
+1. south(替代syncdb)
+http://hi.bccn.net/space.php?uid=2&do=blog&id=17532
+
+学习案例：
+http://www.beijing-open-party.org/
+    https://github.com/openparty/openparty/tree/master/media
+
+http://article.yeeyan.org/view/311527/287706?&via=801038259_WB.3RDAPI.URL.0.0   －－python的神奇方法: __下划线
+
+http://www.2goo.info
+
+http://3wclub.org/service
+
+Balsamiq Mockup  ---设计工具
+
+http://www.onepub.net/category/django-%E7%BC%96%E7%A8%8B%E6%8C%87%E5%8D%97  ---蛇果网  

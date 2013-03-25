@@ -1,0 +1,426 @@
+====Nginx
+
+nginx高性能原因:
+在24G内存的机器上，处理的并发请求数达到过200万。现在的网络服务器基本都采用这种方式，这也是nginx性能高效的主要原因。
+
+异步非阻塞:
+非阻塞就是，事件没有准备好，马上返回EAGAIN， 过会再来吧
+你过一会，再来检查一下事件，直到事件准备好了为止，在这期间，你就可以先去做其它事情
+当事件没准备好时，请求被放到epoll里面，事件准备好了，我们就去读写，当读写返回EAGAIN时，我们将它再次加入到epoll里面
+这里的并发请求，是指未处理完的请求，线程只有一个，所以同时能处理的请求当然只有一个了，只是在请求间进行不断地切换而已，切换也是因为异步事件未准备好，而主动让出的.
+这里的切换是没有任何代价.与多线程相比，这种事件处理方式是有很大的优势的，不需要创建线程，每个请求占用的内存也很少，没有上下文切换，事件处理非常的轻量级。
+
+推荐设置worker的个数为cpu的核数，在这里就很容易理解了，更多的worker数，
+只会导致进程来竞争cpu资源了，从而带来不必要的上下文切换。
+
+一个基本的web服务器来说，事件通常有三种类型，网络事件、信号、定时器。
+信号会中断掉程序当前的运行，在改变状态后，继续执行。
+
+Nginx基本概念
+在nginx中connection就是对tcp连接的封装，其中包括连接的socket，读事件，写事件
+nginx中的http请求的处理就是建立在connection之上的，所以nginx不仅可以作为一个web服务器，也可以作为邮件服务器。
+
+Nginx处理一个连接流程:
+1. nginx启动,解析配置文件,得到监听端口与ip地址.
+2. nginx在master进程里先初始化好这个监听的socket(创建socket,设置addrreuse等选项,绑定到指定ip地址端口,再listen)
+3. master进程fork出多个子进程,子进程开始竞争accept新的连接
+4. 客户端向nginx发起连接
+5. 客户端与nginx进行三次握手,建立一个连接,
+6. 同时某子进程会accept成功,得到建立好的连接的socket, 然后创建nginx对连接的封装(即ngx_connection_t结构体)
+7. 设置读写事件处理函数,并添加读写事件来与客户端进行数据交换
+8. nginx或客户端来主动关掉连接.
+
+nginx与可以作为客户端来请求其它server数据(如upstream模块).
+
+如果是HTTP作为反向代理来说，最大并发数量应该是worker_connections * worker_processes/2。因为作为反向代理服务器，每个并发会建立与客户端的连接和与后端服务的连接，会占用两个连接。
+
+
+=====request
+request，在nginx中我们指的是http请求，具体到nginx中的数据结构是ngx_http_request_t
+ngx_http_request_t是对一个http请求的封装, 
+一个http请求，包含请求行、请求头、请求体、响应行、响应头、响应体。
+
+===HTTP请求的处理过程:
+1. 一个http服务器，通常在一个连接建立好后，客户端会发送请求过来。
+2. 然后我们读取一行数据，分析出请求行中包含的method、uri、http_version信息。
+3. 然后再一行一行处理请求头，并根据请求method与请求头的信息来决定是否有请求体以及请求体的长度，
+4. 然后再去读取请求体。
+5. 得到请求后，我们处理请求产生需要输出的数据，然后再生成响应行，响应头以及响应体。
+6. 在将响应发送给客户端之后，一个完整的请求就处理完了。
+
+函数:
+ngx_http_init_request  --设置读事件为ngx_http_process_request_line
+见图: nginx请求处理流程.png(~/Pictures/tech/)
+
+===长连接:
+http请求是某于TCP协议之上的, 
+当客户端在发起请求前，需要先与服务端建立TCP连接，而每一次的TCP连接是需要三次握手来确定的，如果客户端与服务端之间网络差一点，这三次交互消费的时间会比较多，而且三次交互也会带来网络流量。
+http请求是请求应答式的，如果我们能知道每个请求头与响应体的长度，那么我们是可以在一个连接上面执行多个请求的，这就是所谓的长连接，但前提条件是我们先得确定请求头与响应体的长度。
+
+===负载均衡模块
+负载均衡模块用于从”upstream”指令定义的后端主机列表中选取一台主机。nginx先使用负载均衡模块找到一台主机，再使用upstream模块实现与这台主机的交互。
+nginx模块一般被分成三大类：handler、filter和upstream.
+upstream，将使nginx将跨越单机的限制，完成网络数据的接收、处理和转发。
+
+====Nginx的启动模块
+启动模块从启动Nginx进程开始，做了一系列的初始化工作，源代码位于src/core/nginx.c，从main函数开始:
+
+    时间、正则、错误日志、ssl等初始化
+    读入命令行参数
+    OS相关初始化
+    读入并解析配置
+    核心模块初始化
+    创建各种暂时文件和目录
+    创建共享内存
+    打开listen的端口
+    所有模块初始化
+    启动worker进程
+
+accept锁
+Nginx是多进程程序，80端口是各进程所共享的，多进程同时listen 80端口，势必会产生竞争，
+也产生了所谓的“惊群”效应。当内核accept一个连接时，会唤醒所有等待中的进程，但实际上只有一个进程能获取连接，其他的进程都是被无效唤醒的。所以Nginx采用了自有的一套accept加锁机制，避免多个进程同时调用accept。
+
+
+====Nginx二级域名实现
+你好，我请教个问题：
+我的网站根目录是/wwwdoc/myweb/
+我配置了域名domian.com指向myweb/可正常访问。
+现在我新建了个目录/wwwdoc/img/，用来存储上传的图片， 比如今天现在上传了一张xxx.jpg的图片，存在服务器上的完整路径是/wwwdoc/img/2012/03/xxx.jpg，
+我希望图片的url是：http://img.domain.com/2012/03/xxx.jpg;
+我的nginx该如何配置？请指点下，谢谢
+A:
+用两个server就可以了。
+    server {
+    server_name domian.com;
+    root /wwwdoc/myweb;
+    }
+
+    server {
+    server_name img.domian.com;
+    root /wwwdoc/img;
+    }
+
+
+=====Nginx目录结构
+配置文件分成三部分：
+    /etc/nginx根目录存放公共的配置
+    在sites_available和sites_enabled配置站点相关的信息例如域名端口等等
+
+sites_available:
+    Inside here will be files containing the configurations for each site you want to serve.
+    note that a file in sites-available does not mean they are active (i.e. your users will not be able to browse to the domain) as you need to enable them first. 
+
+sites_enabled:(存放符号链接,)
+    These are symlinks to whichever sites you want to enable.
+    So if you had 5 sites configured and available (i.e. in the sites-available folder), 
+    nothing would happen until you enabled them to be served.
+
+==Disabling a site
+    > sudo rm /etc/nginx/sites-enabled/default
+    > restart nginx
+
+==Enabling a site
+    All you do is create a symlink to the desired virtual host file in sites-available:
+    > sudo ln -s /etc/nginx/sites-available/default /etc/nginx/sites-enabled/default
+        --请使用全路径进行创建.否则创建的链接会损坏
+
+    > sudo ln -s /etc/nginx/sites-available/xizhi-maintain.conf /etc/nginx/sites-enabled/xizhi-maintain.conf
+            -----网站正在维护中...
+
+    > sudo ln -s /home/johnson/prod/configs/nginx/xizhi-server.conf /etc/nginx/sites-enabled/xizhi-server.conf
+            -----网站正常访问
+
+    restart nginx
+
+Nginx配置文件详细解释: --very nice
+    http://articles.slicehost.com/2007/12/13/ubuntu-gutsy-nginx-configuration-1   --nginx.conf
+    http://articles.slicehost.com/2007/12/14/ubuntu-gutsy-nginx-virtual-hosts     --add virtual Host
+    http://articles.slicehost.com/2007/12/12/ubuntu-gutsy-nginx-config-layout     --nginx layout
+    
+==Default short /etc/nginx/nginx.conf file:
+############################################
+    user www-data;
+    worker_processes  1;
+
+    error_log  /var/log/nginx/error.log;
+    pid        /var/run/nginx.pid;
+
+    events {
+        worker_connections  1024;
+    }
+
+    http {
+        include       /etc/nginx/mime.types;
+        default_type  application/octet-stream;
+
+        access_log  /var/log/nginx/access.log;
+
+        sendfile        on;
+        #tcp_nopush     on;
+
+        #keepalive_timeout  0;
+        keepalive_timeout  65;
+        tcp_nodelay        on;
+
+        gzip  on;
+
+        include /etc/nginx/sites-enabled/*;
+
+    }
+############################################
+
+====other config file in sites-available(or in sites-enabled) only has server {} segments
+除去/etc/nginx/nginx.conf,其他具体站点主机的配置文件里,只含有server{} 片段的配置
+
+>> keepalive_timeout  65;
+    --once a connection has been established and the client has requested a file, this says "sit there 
+        and ignore everyone else until the time limit is reached or you get a new request from the client".
+    Why would you want a higher time? In cases where there will be a lot of interactivity on the site. However, in most cases, people will go to a page, read it for a while and then click for the next page
+
+
+>> gzip on;
+    -- It allows for instant, real time compression. 压缩
+
+>> include /etc/nginx/sites-enabled/*;
+    Defines what settings to include that are located outside of the main nginx.conf.
+    
+====虚拟主机配置 Virtual Hosts setup
+
+
+
+示例:
+server {
+    listen   80;
+    server_name  www.domain1.com;
+    rewrite ^/(.*) http://domain1.com/$1 permanent;
+}
+
+server {
+    listen   80;
+    server_name domain1.com;
+    access_log /home/demo/public_html/domain1.com/log/access.log;
+    error_log /home/demo/public_html/domain1.com/log/error.log;
+
+    location / {
+        root   /home/demo/public_html/domain1.com/public/;
+        index  index.html;
+        }
+}
+
+===nginx location指令
+    http://wangyan.org/blog/nginx-location.html  ---详
+
+    location [=|~|~*|^~|@] /uri/ { … }
+    〖=〗 表示精确匹配，如果找到，立即停止搜索并立即处理此请求。
+    〖~ 〗 表示区分大小写匹配
+    〖~*〗 表示不区分大小写匹配
+    〖^~ 〗 表示只匹配字符串,不查询正则表达式。
+    〖@〗 指定一个命名的location，一般只用于内部重定向请求。
+
+    如果字符串和正则都匹配，那么正则优先级较高
+
+    配置实例:
+    location  = / {
+      # 只匹配对 / 目录的查询.
+      [ config A ]
+    }
+    location  / {
+      # 匹配以 / 开始的查询，即所有查询都匹配。
+      [ config B ]
+    }
+    location ^~ /images/ {
+      # 匹配以 /images/ 开始的查询，不再检查正则表达式。
+      [ config C ]
+    }
+    location ~* \.(gif|jpg|jpeg)$ {
+      # 匹配以gif, jpg, or jpeg结尾的文件，但优先级低于config C。
+      [ config D ]
+    }
+
+    四、全局变量
+    $args #这个变量等于请求行中的参数。
+    $content_length #请求头中的Content-length字段。
+    $content_type #请求头中的Content-Type字段。
+    $document_root #当前请求在root指令中指定的值。
+    $host #请求主机头字段，否则为服务器名称。
+    $http_user_agent #客户端agent信息
+    $http_cookie #客户端cookie信息
+    $limit_rate #这个变量可以限制连接速率。
+    $request_body_file #客户端请求主体信息的临时文件名。
+    $request_method #客户端请求的动作，通常为GET或POST。
+    $remote_addr #客户端的IP地址。
+    $remote_port #客户端的端口。
+    $remote_user #已经经过Auth Basic Module验证的用户名。
+    $request_filename #当前请求的文件路径，由root或alias指令与URI请求生成。
+    $query_string #与$args相同。
+    $scheme #HTTP方法（如http，https）。
+    $server_protocol #请求使用的协议，通常是HTTP/1.0或HTTP/1.1。
+    $server_addr #服务器地址，在完成一次系统调用后可以确定这个值。
+    $server_name #服务器名称。
+    $server_port #请求到达服务器的端口号。
+    $request_uri #包含请求参数的原始URI，不包含主机名，如：”/foo/bar.php?arg=baz”。
+    $uri #不带请求参数的当前URI，$uri不包含主机名，如”/f如何开启Nginx的目录文件列表功能？
+
+
+打开nginx.conf文件，在location server 或 http段中加入
+ autoindex on;
+另外两个参数最好也加上去:
+autoindex_exact_size off;
+默认为on，显示出文件的确切大小，单位是bytes。
+改为off后，显示出文件的大概大小，单位是kB或者MB或者GB
+autoindex_localtime on;
+默认为off，显示的文件时间为GMT时间。
+ 改为on后，显示的文件时间为文件的服务器时间oo/bar.html”。
+    $document_uri #与$uri相同。
+
+=====如何开启Nginx的目录文件列表功能？
+
+打开nginx.conf文件，在location server 或 http段中加入
+ autoindex on;
+另外两个参数最好也加上去:
+autoindex_exact_size off;
+默认为on，显示出文件的确切大小，单位是bytes。
+改为off后，显示出文件的大概大小，单位是kB或者MB或者GB
+autoindex_localtime on;
+默认为off，显示的文件时间为GMT时间。
+ 改为on后，显示的文件时间为文件的服务器时间
+
+在nginx中这样写规则
+
+rewrite ^/([0-9]{5}).html$ /x.jsp?id=$1 last;
+
+是无法启动的，解决的办法是加上两个双引号
+
+rewrite "^/([0-9]{5}).html$" /x.jsp?id=$1 last;
+
+这样就OK了，应该可以说是完全兼容apache的语法的，只需要改下RewriteRule为Rewrite，后面的一般可以这样对应改
+
+[R] -> redirect;
+[P] -> last;
+[R,L] -> redirect;
+[P,L] -> last;
+[PT,L] -> last;
+
+nginx rewrite中支持4种类型的转向：
+
+跳转型的
+redirect：302跳转到rewrite后的地址
+permanent：301永久定向到rewrite后的地址，对搜索引擎更友好
+
+代理型的
+last：重新将rewrite后的地址在server标签中执行
+break：将rewrite后的地址在当前location标签中执行
+
+配置nginx的SSI
+
+===========使用nginx反向代理时，获取用户IP设置：
+修改nginx/mysite.conf文件，在server--location--项中添加虚线标注部分
+server {
+    location / {
+            client_max_body_size 10M;
+            proxy_pass   http://127.0.0.1:8100;
+            proxy_set_header   Host             $host;                      #-------------added                                
+            proxy_set_header   X-Real-IP        $remote_addr;               #-------------added                                
+            proxy_set_header   X-Forwarded-For  $proxy_add_x_forwarded_for; #-------------added                                
+    }
+}
+
+=====https
+server {  
+        listen   80;  
+        server_name 127.0.0.1;  
+  
+        ssl                  on;  
+        ssl_certificate      server.crt;  
+        ssl_certificate_key  server.key;  
+        ssl_session_timeout  5m;  
+        ssl_protocols  SSLv2 SSLv3 TLSv1;  
+        ssl_ciphers  HIGH:!aNULL:!MD5;  
+        ssl_prefer_server_ciphers   on;  
+  
+        access_log logs/access_log;  
+        uwsgi_connect_timeout 300;  
+        location / {  
+                uwsgi_param UWSGI_SCHEME https;  
+                uwsgi_pass 127.0.0.1:9000;  
+                include        uwsgi_params;  
+        }  
+        location /static {  
+                alias /var/www/html/static;  
+                access_log off;  
+        }  
+        location /tmp {  
+                alias /tmp;  
+                access_log off;  
+        }  
+    }
+
+======负载均衡
+upstream  mysvr {    定义负载均衡池，可以有多个,这里后端是squid-server组 
+    server   192.168.1.10;  
+    server   192.168.1.11;  
+    hash  $http_host$request_uri;  
+}    根据url来hash,后端为缓存server的如squid，可提高命中率  
+ 
+upstream  websvr{  定义后端websrv的均衡池,这里后端是web-server组  
+     server  192.168.1.20;  
+     server  192.168.1.21;  
+}  　    采用轮询  
+　　注：nginx负载均衡方式：轮询，权重，ip_hash,url_hash,fair.具体解释下面有说明。
+ 
+upstream  message_server{  定义后端message_server的均衡池  
+     server  192.168.1.30;  
+     server  192.168.1.31;  
+} 
+
+server {     　　　　 定义虚拟主机,第一个虚拟主机,反向代理mysrv负载组  
+    listen 80;
+    server_name www.domain.com;
+        location ~.*\.(ico|mp3|avi|wma|wmv|asf|mpg|mov|mid|js|css|jpg|ping|gif|swf|flv)${
+    　　　　proxy_set_header Host $host;
+    　　　　proxy_set_header X-Real-IP $remote_addr;
+    　　　　proxy_set_header X-Forwarded-For $proxy_add_x_forwaded_for;自定义变量获取原客户端真实IP。
+    　　　　
+    　　 　 proxy_pass http://mysrv;　#反向代理到mysrv负载池。
+    　　　　root html; #网页文件根目录，后端server 默认路径。
+　　　  }
+
+　　　   location ~.*\.(php|jsp|cgi)?${
+　　　　　动态可直接proxy_pass到后端web池.http://websrv;
+　　　   }
+
+　　　location / 匹配以/开头的url
+　　　{
+　　　　proxy_next_upstream http_502 http_504 error timeout invalid_header;
+　　　  ##如果后端服务器返回502，504，执行超时错误，自动请求转发到后端另一台server,故障切换。
+　　　　proxy_pass http://mysrv;
+　　　　proxy_set_header Host $host;
+　　　　proxy_set_header X-Forwarded-For $remote_addr;
+}
+　 limit_conn myzone 100; 　限制单个IP的100个并发访问数.    #-----------------*****
+　　　access_log /var/log/nginx/access.log main;
+} 
+
+ server{ 第二个虚拟主机,反向代理websrv负载组
+    listen 80;
+    server_name www1.domain.com;
+    
+    ##访问http://www1.domain.com/message/...地址，反向代理到message_server池
+    location /message/
+    {
+    proxy_pass http://message_server;
+    proxy_set_header Host $host;
+    }
+     
+    ##访问除了/message/之外的http://www1.domain.com/.....地址，反向代理到websrv
+    location / {
+        proxy_pass http://websrv;
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-For $remote_addr;
+    }
+    access_log /var/log/nginx/message.access;
+}  
+
+
+
+

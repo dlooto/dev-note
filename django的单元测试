@@ -1,0 +1,151 @@
+django的单元测试的一些总结
+
+django的测试分成两种：doctests 和 unit tests
+
+1.首先在你的application里面创建一个继承unittest.TestCase的类如MyTestCase
+注意：你的application必须要有models.py文件，否则他不识别该单元测试。
+
+2.在MyTestCase类中创建测试方法，其中setUp为测试初始化方法，tearDown为测试销毁方法，单元测试的语法等和其他的大同小异。
+
+3.manage.py test
+即可查看测试结果了
+
+测试的时候自动会创建内存数据库，结束后自动销毁
+
+其单元测试带有一些测试工具，常用的是Client和Fixtures
+
+Client模拟http的post和get，用来测试django中的views部分。
+
+python 代码
+ 
+def setUp(self):   
+    self.client = Client()   
+  
+def test_index(self):   
+    self.client.get('/manage/index/')   
+#get   
+def test_add_edit_ms(self):   
+    self.client.get('/manage/ms/1/')   
+#post   
+def test_delete_ms(self):   
+    self.client.post('/manage/ms/delete/',{'ids':'1'})   
+
+Fixtures是为测试提供一些初始数据。
+1.创建一json(xml/yml)的数据，你可以使用命令
+manage.py dumpdata >testdata.json
+获取初始数据，你也可以根据其格式自己配置，具体格式如下：
+[
+    {"pk": "1", "model": "scheme.monthschemetemplate", "fields": {"uploadmode": 0, "dutor": 1, "remoteemail": "", "createdate": "2007-10-26 11:29:30", "ftpuid": "", "ftppwd": "", "content": "ddddddddddddddd", "ftpserver": ""}},
+    {"pk": "1", "model": "scheme.monthscheme", "fields": {"uploadmode": 0, "dutor": 1, "isfinish": false, "remoteemail": "", "createdate": "2007-10-26 11:29:43", "tipdate": "2007-10-05 08:00:00", "ftpuid": "", "month": "10", "content": "ddddddddddddddd", "ftpserver": ""}}
+]
+
+2.将testdata.json文件复制到App的fixtures的目录（不是项目的fixtures的目录下),也可以复制到你所需要的目录,然后在setting.py文件中配置FIXTURE_DIRS
+
+FIXTURE_DIRS = (
+   './fixtures',
+)
+
+3.在测试类中增加如下代码
+fixtures = ['testdata']
+testdata就是fixtures下的文件名称,如果多个使用['testdata','testdata1']
+
+如果你的testdata.json的对象含有外键，如monthscheme.dutor类型是User，那么则需要有id=1的User对象，否则涉及到外键的测试会出错，你可以将User的对象写到testdata.json文件中。
+
+4.写一个取testdata数据的测试方法，如：
+
+ 
+from django.test import TestCase   
+from django.test.client import Client   
+from scheme.models import MonthSchemeTemplate,MonthScheme   
+from django.contrib.auth.models import User   
+  
+class ManageTestCase(TestCase):   
+    fixtures = ['scheme.json',]   
+       
+    def setUp(self):   
+        self.client = Client()   
+  
+    def test_add_edit_ms(self):   
+        #self.client.get('/manage/ms/1/')   
+        m = MonthScheme.objects.get(id=1)   
+        self.assertEquals(m.taskname,'ddddddddddddddd')   
+       
+  
+       
+    def tearDown(self):   
+        pass;   
+        #self.user.delete()  
+注意：必须使用from django.test import TestCase，而不能使用import unittest方式。
+
+5.manage.py test
+    $ ./manage.py test
+
+默认情况下此命令会运行工程内所有应用测试，还可指定特定应用，指定特定testCase,甚至对一个特定的方法进行测试。
+
+    $ ./manage.py test myapp
+    $ ./manage.py test myapp.AnimalTestCase
+    $ manage.py test animals.AnimalTestCase.testFluffyAnimals  
+        -- manage.py test 应用.模块.类名.方法名
+
+
+======
+辅助类的简要描述：
+
+test client
+
+test client起到伪浏览器的作用，可以通过此类实现对views的测试及与Django驱动应用之间的交互。
+
+通过test client类可以做下列事情：
+
+    模拟一个URL上的GET和POST请求，并观察响应—从低水平的HTTP（结果头信息和状态代码）到页面内容。
+    测试对一个给定的URL，执行正确的view。
+    测试对一个给定的请求，可以获得一个特定的Django模板（模板内容包含特定的值）。
+
+注：test client类并不能代替Twill， Selenium或者其他浏览器内的框架。
+RequestFactory
+RequestFactory类与test client类共享相同的API。然而它的作用不是一个浏览器，而是提供一种方式产生一个可以用于任何view的请求实例。这意味着测试view函数可以像其他函数测试一样—作为一个黑盒，已知输入，测试指定的输出。
+此类的API是test client API的一个子集，有一些轻微的限制：
+
+    仅能访问HTTP方法get(),post(),put(),delete(),head()和options()。
+    除了follows，这些方法接受相同的参数。因为这仅仅是产生请求的工厂，处理响应由自己决定。
+    不支持中间设备。如果view需要的话，Session和认证属性需测试本身提供。
+
+TestCase
+TestCase（django.test.TestCase）类扩展自unittest.TestCase基类。提供了一些对策是网站有用的额外功能。改进：
+    固定成员的自动加载
+    在一次处理中包装每个测试
+    创建一个TestClient实例
+    测试像重定向和form出错等Django指定的assertion。
+
+============summary
+请参见profiles.tests模块
+运行测试：
+    manage.py test profiles.NotificationTest.testAddNotification
+        --manage.py test为固定写法，后依次为：应用.类名.测试方法，也可如下测试整个类：
+        --manage.py test profiles.NotificationTest
+
+===============去掉创建默认数据库DB环节，
+local_settings.py中增加配置项：(或者也可以考虑新生成一个settings.py文件，
+在里面添加该配置项，这样在运行测试用例时可带上可选参数，以决定是否创建临时DB)
+    TEST_RUNNER = 'common.testrunner.NoDbTestRunner'
+
+Create a custom settings:
+    from mysite.settings import *
+    
+    # Test runner with no database creation
+    TEST_RUNNER = 'mysite.scripts.testrunner.NoDbTestRunner'
+
+When you're running your tests, run it like the following with --settings flag set to your new settings file:
+    python manage.py test myapp --settings='no_db_settings'
+
+=========DJango 请求测试
+>>> from django.test.client import Client
+>>> c = Client()
+>>> response = c.post(’/login/’, {’username’: ’john’, ’password’: ’smith’})
+>>> response.status_code
+200
+>>> response = c.get(’/customer/details/’)
+>>> response.content
+’<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 ...’
+
+

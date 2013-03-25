@@ -1,0 +1,95 @@
+>>Aptana import Lib红色错误, 如import random, 显示:Unresolved import error 
+解决:
+I was having this issue as well, and fixed it by forcing PyDev to update its indexing database (presumably). Just go into Project Properties, then Interpreter, then "Configure an Interpreter not listed" hyperlink, then make some nondestructive edits to a python path therein, it'll make PyDev think it needs to reindex everything and this usually fixes this sort of issue for me.
+
+After doing this, make sure to make another random edit in each file displaying the error markers ("unresolved import", etc.) to force PyDev to rescan those as well.
+
+from :
+    https://aptanastudio.tenderapp.com/discussions/problems/1350-unresolved-import-error-in-pydev
+
+
+====other_dict must be a mapping (dictionary-like) object.
+/home/junn/work/mysite-env/local/lib/python2.7/site-packages/django/template/context.py in update, line 102
+现象: 
+    凡render_to_response("hello.html", RequestContext(request, {"hehe":"hello"}))
+        ---RequestContext can't be used 
+Solved:
+    check context_processors.py, the funcs in this file must return a dict type data(not none or others) 
+
+
+pip install PIL(安装PIL1.1.7过程中若出现以下信息,以表示JPEG, FREETYPE2等不被支持,需要考虑下方的PIL源码安装方式)
+
+    --------------------------------------------------------------------
+    *** TKINTER support not available
+    *** JPEG support not available
+    *** ZLIB (PNG/ZIP) support not available
+    *** FREETYPE2 support not available
+    *** LITTLECMS support not available
+
+    To add a missing option, make sure you have the required
+    library, and set the corresponding ROOT variable in the
+    setup.py script.
+
+
+
+
+问题现象:  
+    ImportError:python PIL ImportError: The _imagingft C module is not installed (该问题在上传图片,或生成验证码图片用freetype2时会出现)
+解决:
+# 需要先安装jpeg库
+wget http://www.ijg.org/files/jpegsrc.v7.tar.gz
+tar -zxvf jpegsrc.v7.tar.gz
+cd jpeg-7
+CC="gcc -arch x86_64"
+./configure --enable-shared --enable-static
+make
+sudo make install   ---安装完成后记住路径,如/usr/local/lib
+
+# 下载PIL源码包,修改setup.py文件重新编译,后安装
+wget http://effbot.org/downloads/Imaging-1.1.7.tar.gz
+tar -zxvf Imaging-1.1.7.tar.gz
+cd Imaging-1.1.7
+rm -rf build
+
+
+vim setup.py :
+    JPEG_ROOT = libinclude("/usr/local/lib")   --# 设置JPEG库的路径
+python setup.py build
+python setup.py install
+
+# 把JPEG加入到系统库路径
+sudo vi /etc/ld.so.conf   --打开/etc/ld.so.conf文件,写入/usr/local/lib
+sudo ldconfig    --# OK，完成
+
+--上述操作完成后就不会再报找不到 _imaging 的错误了。
+
+别高兴太高，如果用到了freetype2，还会报_imagingft找不到。解决办法类似，先安装freetype2，在安装PIL里指定freetype2路径，将freetype2加到系统库路径中即可。
+
+
+下载freetype:
+     http://download.savannah.gnu.org/releases/freetype/
+同上安装freetype, 到/usr/local/lib
+
+下载zlib:
+    http://sourceforge.net/projects/libpng/files/zlib/
+
+download all required libs:
+    http://jamiecurle.co.uk/blog/webfaction-installing-pil/
+
+===paramiko 正常启动mysql-workbench需要安装该包
+
+===解决循环import问题 
+To avoid cyclic imports, specify FK model as a string, e.g
+    collection = models.ForeignKey('Collection') # Collection is in the same module
+or
+    collection = models.ForeignKey('myapp.Collection') # Collection is in another app
+
+
+====单元测试找不到应用unit test
+django.core.exceptions.ImproperlyConfigured: App with label common/api could not be found
+解决 :
+    You need both these files under your app folder:__init__.py, models.py
+    即一个完整的django应用, __init__.py与models.py也是必需的,即使它们是空的文件.
+
+
+

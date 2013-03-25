@@ -1,0 +1,41 @@
+
+
+==sources.list
+http://www.dreamsky.me/%E6%BA%90%E5%88%97%E8%A1%A8
+
+ssh://zongsui@58.215.172.48//home/zongsui/prod/projects/mysite
+
+--
+sudo apt-get install  python-dev build-essential
+pip install -r ../repos/mysite/requirements/project.txt
+
+
+
+
+WWW
+know requirements
+create project structured
+
+MediaWiki:Sidebar 
+
+local DNS
+        
+公网IP:
+    118.123.15.176
+
+git clone file://\\\\192.168.1.20\f\gittest 
+
+mysql:root/_Msql_1130
+
+
+
+
+
+
+
+
+
+
+
+
+

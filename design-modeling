@@ -1,0 +1,175 @@
+
+=========Design and Modeling
+
+Model:
+An object that wraps a row in a database table or view, encapsulates the database access, and adds domain logic on that data.
+
+WYSIWYG
+
+
+class ItemSold(models.Model):
+    name = models.CharField(max_length = 100)
+    value = models.PositiveIntegerField()
+    ...
+    #Audit field
+    created_on = models.DateTimeField(auto_now_add = True)
+    updated_on = models.DateTimeField(auto_now = True)
+
+====ForeignKey
+To create a recursive relationship -- an object that has a many-to-one relationship with itself -- use models.ForeignKey('self').
+
+====OneToOneField
+概念上类似于ForeignKey, 但关联关系的另一端将仅返回一个单一对象
+常用场景: 作为某已有model的扩展属性(model)的主键.
+接受所有ForeignKey参数, 加一个额外的: parent_link(用于继承关系中)
+
+====Model inheritance(模型继承关系)====
+
+Django中的3种模型继承关系
+1.Abstract Base Classes     --父模型类不持久化到DB, 仅持有基础信息(供子类继承)
+2.Multi-table inheritance   --父模型与子模型都持久化到DB
+3.Proxy models              --仅为扩展父模型的行为(添加方法), 不添加新的字段 User --> MyUser
+
+==Abstract Base Classes(抽象基类)
+class CommonInfo(models.Model):
+    name = models.CharField(max_length=100)
+    age = models.PositiveIntegerField()
+
+    class Meta:
+        abstract = True    ##基类不会创建DB表
+
+class Student(CommonInfo):
+    home_group = models.CharField(max_length=5)  #若未声明Meta内部类的abstract=True属性, 子类默认为具体类
+
+The Student model will have three fields: name, age and home_group. 
+The CommonInfo model cannot be used as a normal Django model, since it is an abstract base class. 
+It does not generate a database table or have a manager, and cannot be instantiated or saved directly.
+
+基类中可添加方法, 但仅可以操作自己已定义的方法. 
+    CommonInfo.objects.get(id=1) 是不允许的
+
+==Multi-table inheritance (多表继承)
+    class Place(models.Model):
+        name = models.CharField(max_length=50)
+        address = models.CharField(max_length=80)
+
+    class Restaurant(Place):
+        serves_hot_dogs = models.BooleanField()
+        serves_pizza = models.BooleanField()
+
+    >>> Place.objects.filter(name="Bob's Cafe")
+    >>> Restaurant.objects.filter(name="Bob's Cafe")
+
+    父类中的所有字段在子类中也是有效的, 而字段数据将存放于不同的DB表.
+     ---->这其实是指如下表结构： 
+            Place:
+                id
+                name
+                address
+            Restaurant:         ---子表仅存储其特有的字段，及对父类对象的引用(id)
+                place_ptr_id
+                serves_hot_dogs
+                serves_pizza      
+
+    >>> p = Place.objects.get(id=12)  --若该id查询出其实是一个子类对象,则可以对该父类引用进行转换, 以使用其子类版本.强制转换的方法:  父类对象直接引用子类对象,如p.restaurant (restaurant为模型名小写, 源自Django官方文档)
+    # If p is a Restaurant object, this will give the child class:
+    >>> p.restaurant
+    <Restaurant: ...>
+
+   子类无权访问父类的Meta类。
+但是仍然有例外情况：若子类没有在Meta类中指定排序属性或get_latest_by属性，子类将从父类继承.
+多表继承自动地（隐式地）使用了O2O来连接子类与父类：
+    OneToOneField（parent_link=True）
+
+class Supplier(Place):
+    # Must specify related_name on all relations.
+    customers = models.ManyToManyField(Restaurant, related_name='provider')
+   －－－此子类必须指定related_name，否则将与默认的（隐式的）O2O关系冲突
+
+＝＝＝＝Proxy Models(代理模型)
+Proxy model必须继承自非抽象类(若要实现其应用的功能的话),且只能是单一继承（不能同时继承多个非抽象类）.
+Proxy model对象的所有行为(CRUD等操作)与父类对象都在同一张表上.
+
+class MyPerson(Person):
+     class Meta:
+        proxy = True
+
+     def do_something(self):   ----与Person在同一个DB表上操作
+            ...
+
+但可以继承多个抽象模型类（且这些抽象模型类没有定义任何的字段属性）－－－其实这相当于Java里实现接口的概念.
+Proxy models将从其非抽象父类继承所有Meta选项
+若Proxy未指定manager，它将直接继承父类的。若定义了，则新的manager将作为默认，父类里的manager仍然有效。
+若proxy要重新定义manager且不想改变默认（继承自父类）的，则可以
+
+多表继承中，子类不继承父类的managers属性
+
+Meta.managed与Meta.proxy区别：
+1. 若需要已存在的模型或DB表的一份镜像(视图)，使用Meta.managed=False.
+  这样模型只是一个DB表视图，Django将不会持久化它。
+ 
+2.若为改变一个原有模型的行为(修改或增加方法)，且保持与原模型一致的字段属性，则使用
+   Meta.proxy=True
+
+
+Django中子类可以继承多个父类，若多个父类都有Meta内部类，则仅第一个父类的Meta被使用.
+其他父类的将被忽略。
+Python语言中，子类可以覆盖父类的任何属性。但在Django中，Field实例类型的属性不允许被重写（至少目前）。
+
+
+尝试用  Manager‘s latest() and earliest() methods.
+    get_latest_by ＝ 'order_date'
+
+what is managed=False?
+managed=False,将不会执行DB表的创建与删除操作, 和一般的python无明显区别.
+
+from django.contrib.auth.models import User
+class MyUser(User):
+    class Meta:
+        proxy = True
+
+    def do_something(self):
+        ...
+
+上面MyUser与父类User操作同一张DB表.In particular, any new instances of User will also be accessible through MyUser, and vice-versa:
+
+
+>>> u = User.objects.create(username="foobar")
+>>> MyUser.objects.get(username="foobar")
+<MyUser: foobar>
+
+======Tips:
+若要给User添加额外的方法, 则delegation优先于proxy = True方式.因: 若User对象已提供,
+则MyUser的得到需要利用user.id重查DB.委托则不存在该问题(虽然会多一行构建委托对象的代码).
+且若MyUser proxy User,则(User)myUser强制转换的结果 myUser.id == user
+
+
+file:///home/junn/Documents/python-django-help/django-docs-1.4-en/topics/db/models.html#model-inheritance
+
+
+====扩展User (这并非好的扩展方式,违反了OCP)
+class UserFunctions:
+    def get_shortcut(self):
+        return "user#" + self.id
+    ...
+User.__bases__ += (UserFunctions,)
+
+u = User.objects.get(id=3)
+u.get_shortcut()
+
+
+====多表继承实例
+class Member(Profile):
+    base = models.OneToOneField(Profile, parent_link=True)   --修改默认base指针引用名
+    school = models.CharField(max_length=40)
+
+    class Meta:
+        db_table = 'test_member'
+
+====
+row-level: methods in model    --model内方法属于行级操作 
+table-level:methods in manager  --manager内方法属于表级操作(即同model内多行记录处理)
+table/table:                    --表间操作方法也放于manager
+
+
+

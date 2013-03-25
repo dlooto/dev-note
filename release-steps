@@ -1,0 +1,18 @@
+版本升级步骤:
+1. git clone/pull code
+
+2. Update sys settings:
+    modify settings.py, local_settings.py
+
+3. update sql script
+    cd /home/johnson/prod/projects/xizhi-server 
+    运行: syncdb
+    运行mysql升级脚本:update_script.sql
+
+4. Run all unittest cases
+
+5.Restart server:
+   sudo service nginx restart
+   sudo supervisorctl restart xizhi-server
+
+6.测试验证

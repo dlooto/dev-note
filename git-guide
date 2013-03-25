@@ -1,0 +1,263 @@
+Git guide
+
+中心仓库(origin)包含了两个主要分支，这两个分支的寿命是无限的: 
+    master, develop
+当develop分支上的源码到达一个稳定的状态时，就可以发布版本。所有develop上的变更都应该以某种方式合并回master分支，并且使用发布版本号打上标签。稍后我们会讨论具体操作细节。
+因此，每次有变化被合并到master分支时，根据定义这就是一次新的产品版本发布。
+
+支持性分支:
+    来帮助团队成员间实现并行开发、追踪产品特性、准备产品版本发布、以及快速修复产品问题。
+    与主要分支不同的是，这些分支的寿命是有限的，它们最终都会被删除。
+    有以下种类:
+        特性分支（feature branch）
+        发布分支（release branch）
+        热补丁分支（hotfix branch）
+特性分支:
+    可能的分支来源：develop
+    必须合并回：develop
+    分支命令约定：任何除master, develop, release-*, 或 hotfix-*以外的名称
+
+特性分支的重点是，只要特性还在开发，该分支就会一直存在，不过它最终会被合并回develop分支（将该特性加入到发布版本中），或者被丢弃（如果试验的结果令人失望）。
+
+特性分支往往只存在于开发者的仓库中，而不会出现在origin。
+
+创建一个特性分支:
+    >>git checkout -b myfeature develop
+        --switch to a new branch "myfeature"
+
+合并完成的特性应合并回develop分支,以将特性加入到下一个发布版本.
+    >>git checkout develop          --switch to branch develop
+    >>git merge --no-ff myfeature   
+    >>git branch -d myfeature       --deleted branch myfeature
+    >>git push origin develop
+
+上述代码中的–no-ff标记会使合并永远创建一个新的commit对象，即使该合并能以fast-forward的方式进行。这么做可以避免丢失特性分支存在的历史信息，同时也能清晰的展现一组commit一起构成一个特性。比较如下--no-ff图
+    
+====发布分支
+可能的分支来源：develop
+必须合并回：develop和master
+分支命名约定：release-*
+
+发布分支为准备新的产品版本发布做支持。它允许你在最后时刻检查所有的细节。此外，它还允许你修复小bug以及准备版
+本发布的元数据（例如版本号，构建日期等等）。在发布分支做这些事情之后，develop分支就会显得比较干净，也方便为下一大版本发布接受特性。
+
+正是在发布分支创建的时候,对应的版本发布才获得一个版本号--不能更早.
+版本号是在发布分支创建时, 基于项目规则确定的.develop分支的状态已经是准备好
+    >>git checkout -b release-1.2 develop
+        --switched to a new branch "release-1.2"
+    >>./bump-version.sh 1.2    --虚构的shell脚本, 它修改了一些本地工作区的文件以体现新的版本号
+        --Files modified successfully. version bumped to 1.2
+    >>git commit -a -m "Bumped version number to 1.2"
+
+新的发布分支可能存在一段时间,直到该版本明确对外交付.这段时间内,该分支上可能会有一些Bug的修复.
+在该分支上添加新特性是严格禁止的。新特性必须合并到develop分支，然后等待下一个版本发布。
+
+    
+===结束一个特性分支
+当特性分支达到一个可以正式发布的状态时，我们就需要执行一些操作。首先，将发布分支合并至master（记住，我们之前定义master分支上的每一个commit都对应一个新版本）。接着，master分支上的commit必须被打上标签（tag），以方便将来寻找历史版本。最后，发布分支上的变更需要合并回develop，这样将来的版本也能包含相关的bug修复。
+
+    >>git checkout master
+        --switched to branch 'master'
+    >>git merge --no-ff release-1.2
+        --Merge made by recursive
+    >>git tag -a 1.2
+        --版本发布完成,而且为未来的查阅提供了标签
+
+为了保留发布分支上的变更,还需要将分支合并回develop, 在Git中:
+    >>git checkout develop
+        --switched to branch "develop"
+    >>git merge --no-ff release-1.2
+        --Merge made by recursive
+
+===删除发布分支
+    >>git branch -d release-1.2
+
+===补丁分支
+可能的分支来源：master
+必须合并回：develop和master
+分支命名约定：hotfix-*
+
+使用热补丁分支的主要作用是（develop分支上的）团队成员可以继续工作，而另外的人可以在热补丁分支上进行快速的产品bug修复。
+ ---创建一个补丁分支:
+    $ git checkout -b hotfix-1.2.1 master
+        --Switched to a new branch “hotfix-1.2.1″
+    $ ./bump-version.sh 1.2.1
+    $ git commit -a -m “Bumped version number to 1.2.1″
+
+不要忘了在创建热补丁分之后设定一个新的版本号！
+
+===git tag
+If you get to a point that is important and you want to forever remember that specific commit snapshot, you can tag it with git tag. The tag command will basically put a permanent bookmark at a specific commit so you can use it to compare to other commits in the future. This is often done when you cut a release or ship something. 
+
+    --The -a means "make an annotated tag", which allows you to add a tag message to it, 
+      which is what you almost always want to do.
+     Running this without the -a works too, but it doesn't record when it was tagged,who tagged it, or let you add a tag message. Creating annotated tags is always recommended .
+
+notice when we run git log --decorate, we can see our tag there.
+
+
+====操作原则:
+0. 当develop分支上的源码到达一个稳定的状态时，就可以发布版本。所有develop上的变更都应该以某种方式合并回
+    master分支，并且使用发布版本号打上标签
+1. 每次有变化被合并到master分支时，根据定义这就是一次新的产品版本发布。
+2. feature分支往往只存在于开发者的仓库中，而不会出现在origin
+3. feature分支为准备新的产品版本发布做支持。它允许你在最后时刻检查所有的细节, 修复小bug以及准备版本.
+    版本号是在发布分支创建时, 基于项目规则确定.
+4. 新的release分支可能存在一段时间,直到该版本明确对外交付.这段时间内,该分支上可能会有一些Bug的修复.
+    在该分支上添加新特性是严格禁止的。
+5. 应该只在master上打tag？
+
+===创建发布分支
+    >>git checkout -b release-1.2 develop
+    >>./bump-version.sh 1.2                     --进行一些修改
+    >>git commit -a -m "do something v1.2"
+
+===将feature分支合并到develop:
+    >>git checkout develop          --switch to branch develop
+    >>git merge --no-ff myfeature   
+    >>git branch -d myfeature       --deleted branch myfeature
+    >>git push origin develop
+
+===分支命名    
+    master       --主干,唯一
+    dev          --开发分支,其他:dev-1, dev-2
+    release      --发布分支, 其他:release-1.0, release-1.1
+    fix          --bug修复分支
+    feature      --特征分支,其他: feature-xxx(特征名)   
+
+==========command list
+git branch                      --列出有效分支
+git branch (branchname)         --create a new branch
+git checkout -b (branchname)    --create and immediately switch to a branch, 仅删除了本地
+git push origin :release-0.1.1  --删除一个远程分支（就是把一个空的branch赋值给已有的branch，这样就删除了）
+
+git checkout master             --switch to branch 'master' 
+git branch -d (branchname)    --delete a branch
+git tag -a v1.0
+git log --decorate
+git log --oneline --decorate --graph
+git merge --no-ff dev       ---将dev分支合并到当前分支  
+    git merge --no-ff dev -m 'add message'   ---合并时加上消息
+git mergetool               ---选择合并工具
+git status -s
+git diff                    --?自定义diff工具
+
+git init --bare             ---创建空仓库, 无master分支
+git push origin             --默认push到远端master  
+git push origin dev2:master --将dev2分支push到远端(origin)master分支
+git push origin dev2        --将分支dev2 push到远端(dev2对应)
+
+git pull origin master      --从远端(origin)master分支拉取更新
+git remote                  --列出远端仓库
+git branch -r               --列出所有远端分支
+git tag
+git tag -d 20101023_publish  --delete tag with name
+git push origin v0.1.1  --push tag to remote server
+git push origin :20101023_publish       --从服务器上删除分支
+git push origin --tags                   ---把所有的tag都push到服务器上       
+ git config --list                     --查看配置信息
+git stash save     ----save local changes to cache
+git stash pop      ----pop changes from cache 
+
+
+值得注意的是，如果tag名字和分支名字一样的时候，push需要指定refs的详细路径，因为分支和tag在git内部是这样表示的（只是引用），tag只存储所指向的那一次提交： 
+
+refs/tags/{tagnane}
+refs/heads/branches/{branchnane}
+
+所以要这样push相同名字的tag和分支
+
+$: git push origin refs/tags/product
+$: git push origin refs/heads/branches/product
+
+
+
+$: git push origin --tags
+
+
+
+status:
+    UU： updated and unmerged file
+Ignored files are not listed, unless --ignored option is in effect, in which case XY are !!.
+    X          Y     Meaning
+    -------------------------------------------------
+              [MD]   not updated
+    M        [ MD]   updated in index
+    A        [ MD]   added to index
+    D         [ M]   deleted from index
+    R        [ MD]   renamed in index
+    C        [ MD]   copied in index
+    [MARC]           index and work tree matches
+    [ MARC]     M    work tree changed since index
+    [ MARC]     D    deleted in work tree
+    -------------------------------------------------
+    D           D    unmerged, both deleted
+    A           U    unmerged, added by us
+    U           D    unmerged, deleted by them
+    U           A    unmerged, added by them
+    D           U    unmerged, deleted by us
+    A           A    unmerged, both added
+    U           U    unmerged, both modified
+    -------------------------------------------------
+    ?           ?    untracked
+    !           !    ignored
+    --------------------------
+
+
+=======
+Git User's Manual
+
+http://www.kernel.org/pub/software/scm/git/docs/v1.7.10.1/user-manual.html#commit-object
+
+
+
+
+在pull代码时候，遇到如下问题
+
+fatal: failed to read object 9a9ea0f0c4d9a3b4c5a156637b98a1e66265bba4: Permission deniedfatal: The remote end hung up unexpectedly
+
+
+翻阅：http://git.661346.n2.nabble.com/How-to-remove-a-commit-object-td1099708.html
+
+http://www.kernel.org/pub/software/scm/git/docs/v1.7.10.1/user-manual.html#commit-object
+
+http://club15cc.com/code-snippets/git/find-a-dangling-commit-and-reset-current-branch-to-it
+
+
+
+登录远程机器，找到远端仓库
+
+运行命令
+
+1. git prune
+
+2. git repack -A -d
+
+
+
+本地执行pull操作
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

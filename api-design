@@ -1,0 +1,50 @@
+
+
+we are not public API
+
+
+====Error Info:
+{
+"err_code": "201003",
+"err_msg":  "活动不存在"
+}
+
+系统级错误:
+    10000: 访问权限错误,无client_key
+    10001:
+
+服务级错误
+    200000-200999: 服务系统级错误
+    201000-201999: 账号管理
+
+
+请求说明:
+    url:        http://192.168.1.103:8000/api/login/
+    支持验证:   oauth2
+    数据格式 :  json
+    http请求:  POST
+    是否需鉴权:  true
+
+请求参数:
+    名字            是否必须       type           description
+    access_token    true          string
+    email           true          string        用户注册email
+
+
+返回结果:
+    名       类型     描述 
+    status  int     结果状态
+    msg     string  登录结果信息
+
+
+示例:
+    {
+    "status": "0",
+    "msg": "登录成功"
+    }
+
+    {
+    "status": "1",
+    "msg": "密码不正确"
+    }
+

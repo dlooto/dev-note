@@ -1,0 +1,192 @@
+
+#
+# The Python Imaging Library.
+# $Id$
+#
+# base class for image file handlers
+#
+# history:
+# 1995-09-09 fl   Created
+# 1996-03-11 fl   Fixed load mechanism.
+# 1996-04-15 fl   Added pcx/xbm decoders.
+# 1996-04-30 fl   Added encoders.
+# 1996-12-14 fl   Added load helpers
+# 1997-01-11 fl   Use encode_to_file where possible
+# 1997-08-27 fl   Flush output in _save
+# 1998-03-05 fl   Use memory mapping for some modes
+# 1999-02-04 fl   Use memory mapping also for "I;16" and "I;16B"
+# 1999-05-31 fl   Added image parser
+# 2000-10-12 fl   Set readonly flag on memory-mapped images
+# 2002-03-20 fl   Use better messages for common decoder errors
+# 2003-04-21 fl   Fall back on mmap/map_buffer if map is not available
+# 2003-10-30 fl   Added StubImageFile class
+# 2004-02-25 fl   Made incremental parser more robust
+#
+# Copyright (c) 1997-2004 by Secret Labs AB
+# Copyright (c) 1995-2004 by Fredrik Lundh
+#
+# See the README file for information on usage and redistribution.
+#
+
+
+==============================================
+#!/usr/bin/env python
+
+"""
+client module for memcached (memory cache daemon)
+
+Overview
+========
+
+See U{the MemCached homepage<http://www.danga.com/memcached>} for more about memcached.
+
+Usage summary
+=============
+
+This should give you a feel for how this module operates::
+
+    import memcache
+    mc = memcache.Client(['127.0.0.1:11211'], debug=0)
+
+    mc.set("some_key", "Some value")
+    value = mc.get("some_key")
+
+    mc.set("another_key", 3)
+    mc.delete("another_key")
+
+    mc.set("key", "1")   # note that the key used for incr/decr must be a string.
+    mc.incr("key")
+    mc.decr("key")
+
+The standard way to use memcache with a database is like this::
+
+    key = derive_key(obj)
+    obj = mc.get(key)
+    if not obj:
+        obj = backend_api.get(...)
+        mc.set(key, obj)
+
+    # we now have obj, and future passes through this code
+    # will use the object from the cache.
+
+Detailed Documentation
+======================
+
+More detailed documentation is available in the L{Client} class.
+"""
+
+import sys
+import socket
+import time
+import os
+import re
+
+
+
+<=============================================================================>
+# Copyright (C) 2003-2007  Robey Pointer <robeypointer@gmail.com>
+#
+# This file is part of paramiko.
+#
+# Paramiko is free software; you can redistribute it and/or modify it under the
+# terms of the GNU Lesser General Public License as published by the Free
+# Software Foundation; either version 2.1 of the License, or (at your option)
+# any later version.
+#
+# Paramiko is distrubuted in the hope that it will be useful, but WITHOUT ANY
+# WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+# A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
+# details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with Paramiko; if not, write to the Free Software Foundation, Inc.,
+# 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA.
+
+"""
+BufferedFile.
+"""
+
+from cStringIO import StringIO
+
+=================================
+#coding=utf-8
+#
+# Copyright (C) 2012- by XIZHI TECH  <open@lianbi.com.cn>
+#
+# This file is part of xizhi-server.
+#
+# Paramiko is free software; you can redistribute it and/or modify it under the
+# terms of the GNU Lesser General Public License as published by the Free
+# Software Foundation; either version 2.1 of the License, or (at your option)
+# any later version.
+#
+# Paramiko is distrubuted in the hope that it will be useful, but WITHOUT ANY
+# WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+# A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
+# details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with Paramiko; if not, write to the Free Software Foundation, Inc.,
+# 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA.
+
+"""
+File feature description here
+"""
+
+from cStringIO import StringIO
+
+
+
+
+<===============================================================================>
+# -*- coding: utf-8 -*-
+#
+#  Random/random.py : Strong alternative for the standard 'random' module
+#
+# Written in 2008 by Dwayne C. Litzenberger <dlitz@dlitz.net>
+#
+# ===================================================================
+# The contents of this file are dedicated to the public domain.  To
+# the extent that dedication to the public domain is not available,
+# everyone is granted a worldwide, perpetual, royalty-free,
+# non-exclusive license to exercise all rights associated with the
+# contents of this file for any purpose whatsoever.
+# No rights are reserved.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+# EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+# MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+# NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS
+# BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN
+# ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+# CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+# ===================================================================
+
+"""A cryptographically strong version of Python's standard "random" module."""
+
+<======================================================================>
+#coding=utf-8
+#
+# Copyright (C) 2012-  XIZHI TECH Co., Ltd. All rights reserved.
+#
+# Created on ${date}, by ${user}
+#
+# This file is part of xizhi-server.
+#
+
+'''
+File feature description here
+'''
+${cursor}
+<======================================================================>
+
+
+=================Aptana原有文件模板备份
+'''
+Created on ${date}
+
+@author: ${user}
+'''
+${cursor}
+
