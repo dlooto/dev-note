@@ -367,7 +367,21 @@ class Member():
          --logo/
 
 
+====社团管理建模
+models:
+    Club
+    Member
+    Unit
+    Title
 
+    Title对象具体于某社团(某一个Title仅允许被某个特定社团)
+    Unit对象具体于某社团
+    Club   <----> Member : m/m
+    Member <----> Unit   : m/m   
+    Member <----> Title  : m/m
+    Club   <----> Unit   : o/m
+    Club   <----> Title  : o/m
+    
 
 
     

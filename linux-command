@@ -256,6 +256,7 @@ pkill -u zongsui  --将登录用户zongsui踢出
 
 root    ALL=(ALL)     ALL
 zongsui   ALL=(ALL)     ALL
+jerome ALL=(ALL) NOPASSWD: ALL   ---无需输入密码
 
 修改完毕，将/etc/sudoers 文件去掉写权限。
 然后可用zongsui帐号登录，然后用命令 su - ，即可获得root权限进行操作。

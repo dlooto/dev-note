@@ -1516,8 +1516,13 @@ class Province(models.Model):
 
 
 ====django server启动后文件载入顺序：
-    __init__.py
-    settings.py    
+    __init__.py    --最外层包初始化文件
+    settings.py    --最外层settings.py文件
+    apps/
+        --__init__.py --各INSTALLED_APPS包文件
+
+  
+        
 
 ====自定义模型字段(db_column)
 from django.db import models
@@ -1532,5 +1537,21 @@ class Author(models.Model):
     class Meta:
         db_table = 'my_author_table'
         ordering = ('last_name','first_name')
+
+====同步数据库结构: 解决syncdb不能同步db表字段问题
+1.pip install south
+2.工程下建立migrations文件夹，在其中新建__init__.py空文件
+3.工程的settings.py中新加：INSTALLED_APPS新加"south"
+4. SOUTH_MIGRATION_MODULES = {'app_name':'project_name.migrations.app_name', ...}
+syncdb --settings=local_settings   (only do once)
+4.对每个app, 执行：
+    python manage.py convert_to_south app_name  (only do once for every app, 让south托管某应用)
+5.修改完model以后，cmd执行：(有修改,则执行如下命令)
+    python manage.py schemamigration app_name --auto  (commit changes,  生成)
+    python manage.py migrate app_name                 (make changes work)  
+
+
+
+
 
 

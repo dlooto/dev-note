@@ -91,5 +91,19 @@ django.core.exceptions.ImproperlyConfigured: App with label common/api could not
     You need both these files under your app folder:__init__.py, models.py
     即一个完整的django应用, __init__.py与models.py也是必需的,即使它们是空的文件.
 
+====初始化数据initial_data.json依赖问题
+如下,
+    {"pk":1, "model": "clubs.school", "fields": {"name": "成都理工大学", "city": 2}},
+school数据初始化依赖于city, 所以city数据的创建需要放在school之前,否则报错. 
+
+====syncdb or runserver时出现如下简短错误信息:
+    repo.lershare.web/lershare-web/apps/tags/__init__.py:19] ====> Tag data initialized
+    Error: cannot import name Activity
+原因: 
+    local_settings.py里INSTALLED_APPS = [ 里没有添加app  "clubs".
+    因改了初始化全局数据的方式,都放于lershare-web各app的__init__.py里, 所以应用包载入时即初始化数据.
+     
+解决:  添加"clubs"解决
+
 
 

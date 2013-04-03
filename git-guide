@@ -159,6 +159,8 @@ git push origin --tags                   ---把所有的tag都push到服务器�
 git stash save     ----save local changes to cache
 git stash pop      ----pop changes from cache 
 
+git commit --amend  --新提交, 只修改上次提交的信息, 不生成新的提交信息
+
 
 值得注意的是，如果tag名字和分支名字一样的时候，push需要指定refs的详细路径，因为分支和tag在git内部是这样表示的（只是引用），tag只存储所指向的那一次提交： 
 
@@ -210,32 +212,93 @@ Git User's Manual
 http://www.kernel.org/pub/software/scm/git/docs/v1.7.10.1/user-manual.html#commit-object
 
 
-
-
 在pull代码时候，遇到如下问题
 
 fatal: failed to read object 9a9ea0f0c4d9a3b4c5a156637b98a1e66265bba4: Permission deniedfatal: The remote end hung up unexpectedly
 
-
 翻阅：http://git.661346.n2.nabble.com/How-to-remove-a-commit-object-td1099708.html
-
 http://www.kernel.org/pub/software/scm/git/docs/v1.7.10.1/user-manual.html#commit-object
-
 http://club15cc.com/code-snippets/git/find-a-dangling-commit-and-reset-current-branch-to-it
 
-
-
-登录远程机器，找到远端仓库
-
-运行命令
-
-1. git prune
-
-2. git repack -A -d
-
+登录远程机器，找到远端仓库,运行命令
+    1. git prune
+    2. git repack -A -d
 
 
 本地执行pull操作
+
+
+ dev
+*master     <---- gll-dev  当前分支下执行该命令(pull remote dev), 则远端dev上的changes拉取到了本地master
+
+===Gerrit开发流程:
+● git checkout -b local-topic-branch
+● work work work
+● git rebase -i upstream/master         # fix up commits
+● git push gerrit HEAD:refs/for/master
+● Create new commits based on reviews
+● git rebase -i upstream/master         # squash up
+● git push gerrit HEAD:refs/for/master
+
+
+UI login gerrit, and add ssh-key
+ssh -p 29418 jun.xiong@192.168.1.114  --检测是否可以正常访问 Gerrit 仓库
+create a new project in gerrit, and setup the accessrights(normally inherit from a base project)
+git remote add gerrit ssh://jun.xiong@192.168.1.114:29418/repo.lershare.engine.git
+    --git remote rm gerrit ---if created, use this cmd remove it
+vi .git/config  --in ~/work/repos/repo.lershare.engine dir
+git pull gerrit -- pull from 
+git push gerrit --将现有的仓库 push 至新的远端仓库gerrit(or git push gerrit master)
+ 
+in .git/config add following line:
+    push = HEAD:refs/for/master   --push the changes to gerrit branch
+
+scp -p -P 29418 jun.xiong@192.168.1.114:hooks/commit-msg .git/hooks/    --add changeId for commit msg
+
+git push origin HEAD:refs/for/master  --push to gerrit review branch
+
+====use beyond compare as merge tool
+apt-cache search beyond
+sudo apt-get install bcompare
+
+vi ~/.gitconfig, add following into:
+    [diff]
+        exte
+    [merge]
+        tool = bc3
+    [mergetool "bc3"]
+        cmd = bcompare \
+        "$PWD/$LOCAL" \
+        "$PWD/$REMOTE" \
+        "$PWD/$BASE" \
+        "$PWD/$MERGED"
+        keepBackup = false
+        trustExitCode = false
+
+
+rebase: 
+
+能否不切换到master分支,而将dev分支changes合并到master分支 ???
+
+git push [alias] --receive-pack='git receive-pack \
+            --reviewer [email1] --reviewer [email2] \
+            --cc [email3] -cc [email4]' \
+            HEAD:refs/for/[branch] 
+
+尽管实际的分支名称是refs/changes/01/1/1，但看到的却是refs/for/master
+这是因为变更在提交前默认要评审+2，每个人只能+1，也就是说只有一个人做代码审查是无法提交代码的
+
+$GERRIT_REFSPEC  refs/changes/*:refs/changes/*
+$GERRIT_BRANCH
+
+git show aca69cdd76a4a7ab96be3309bf99bb5d975d3684   --根据sha值显示changes(根据sha值显示变更)
+------------------------------------------------------------------------------------
+.
+.
+.
+----------------------------------------------------------------------------------- 
+
+
 
 
 
