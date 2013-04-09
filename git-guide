@@ -244,7 +244,7 @@ http://club15cc.com/code-snippets/git/find-a-dangling-commit-and-reset-current-b
 UI login gerrit, and add ssh-key
 ssh -p 29418 jun.xiong@192.168.1.114  --检测是否可以正常访问 Gerrit 仓库
 create a new project in gerrit, and setup the accessrights(normally inherit from a base project)
-git remote add gerrit ssh://jun.xiong@192.168.1.114:29418/repo.lershare.engine.git
+git remote add gerrit ssh://jun.xiong@192.168.1.114:29418/lershare.engine.git
     --git remote rm gerrit ---if created, use this cmd remove it
 vi .git/config  --in ~/work/repos/repo.lershare.engine dir
 git pull gerrit -- pull from 

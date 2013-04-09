@@ -1,0 +1,52 @@
+
+=======存储与恢复======
+
+http://blog.jobbole.com/14012/  --MySQL数据库备份10个教程
+
+张冬
+    重要的数据每小时 
+    一般的每天 
+    再差的就每周或者不备了 
+    一般是写脚本删除旧版本,保留一周的
+
+====mysqldump备份与恢复
+
+备份所有数据库模式和数据至文件backup092210.sql的话
+    mysqldump -u root -p --all-databases > backup092210.sql
+
+如要备份名为lershare的数据库到一个名为lershare-backup20130409.sql的文件中：
+    mysqldump -u root -p lershare > lershare-backup20130409.sql
+
+备份lershare中t_profile表到lershare-profiles-backup20130409.sql的文件中，使用如下所示的命令：
+    mysqldump -u root -p lershare t_profile > lershare-profiles-backup20130409.sql
+
+只备份数据库的模式schema:
+    mysqldump -u root -p --no-data lershare > lershare-backup092210.sql
+
+
+只备份数据库的数据:
+    mysqldump -u root -p --no-create-info lershare > lershare-backup092210.sql
+
+==自动进行备份
+crontab -e
+    --打开当前登录用户的crontab文件，如果该文件不存在的话就会自动新建一个.
+
+添加如下内容:
+    0 3 * * * /home/junn/tools/lershare-backup.sh
+
+    # 前五个参数分别对应于执行脚本的时间，依次为min,hour,day,month,week
+    # 要想在每星期二的4:45am执行脚本的话，可以使用参数45  4  *  *  3。
+        --alias date='date +%u\ %F\ %T'   #alias date='date +%u\ %D\ %T'
+
+
+====数据恢复　
+mysql -uroot -proot lershare < lershare-backup.sql
+
+    恢复比较慢的可能原因:
+    --建立太多索引就会导致恢复速度特别慢
+    --还可以看下synv_binlog innodb_flush_log_at_trx_commit参数的配置可以设置下，减少物理I/O
+    --把innodb_pool_buffer调大点....因为你磁盘物理I/O可能是瓶劲
+    --innodb存储引擎备份的参数可能不够合理
+
+
+

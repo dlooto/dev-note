@@ -1546,6 +1546,7 @@ class Author(models.Model):
 syncdb --settings=local_settings   (only do once)
 4.对每个app, 执行：
     python manage.py convert_to_south app_name  (only do once for every app, 让south托管某应用)
+
 5.修改完model以后，cmd执行：(有修改,则执行如下命令)
     python manage.py schemamigration app_name --auto  (commit changes,  生成)
     python manage.py migrate app_name                 (make changes work)  

@@ -382,11 +382,24 @@ models:
     Club   <----> Unit   : o/m
     Club   <----> Title  : o/m
     
+django插件:google-analytics
+    http://code.google.com/p/django-google-analytics/
+    https://github.com/clintecker/django-google-analytics
+
+    lershare.com: {% analytics "UA-39933135-1" %}
+    junn.com      {% analytics "UA-39923693-1" %} 
+    
+    pip install django-google-analytics    --not use this 
+
+ actually using following:
+    pip install git+git://github.com/clintecker/django-google-analytics.git 
+    
+
+====Distributed Task Queue: Celery
+http://docs.celeryproject.org/en/latest/index.html 
+    need a Broker: RabbitMQ/Redis/Using a database
 
 
-    
-    
-    
 
 
 

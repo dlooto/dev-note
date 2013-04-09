@@ -328,6 +328,8 @@ sudo apt-get autoremove
 文件管理 # cd cd ~ 或 cd 回当前用户的宿主目录
 文件管理 # cd cd ~用户名 回指定用户的宿主目录
 
+nohup <程序名> &   --实现守护进程
+
 文件管理 # mkdir mkdir 目录名 创建一个目录
 mkdir -p /home/demo/public_html/domain1.com/{public,private,logs,backup}   ---同时创建多个目录,如果父目录不存在,则创建
 mkdir {haha,hehe}    --同时创建haha,hehe目录
