@@ -240,6 +240,8 @@ http://club15cc.com/code-snippets/git/find-a-dangling-commit-and-reset-current-b
 ● git rebase -i upstream/master         # squash up
 ● git push gerrit HEAD:refs/for/master
 
+创建ssh密钥对:
+ssh-keygen -t rsa    --rsa为密钥类型,回车后输入密钥文件名
 
 UI login gerrit, and add ssh-key
 ssh -p 29418 jun.xiong@192.168.1.114  --检测是否可以正常访问 Gerrit 仓库
