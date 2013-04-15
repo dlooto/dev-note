@@ -178,3 +178,7 @@ function grayInputText(inputObj) {
 $("#tag-items").load("{% url tags_get profile %}?page="+pageNo);
 
 
+====前端优化
+http://www.wlog.cn/category/performance/2/
+
+

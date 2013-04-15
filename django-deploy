@@ -331,6 +331,15 @@ pip install -U -i $PACKAGE_URL $PACKAGE_NAME
 安装时可能从/home/junn/work/mysite-env/build目录下取
 如果lershare-engine版本安装不成功,可考虑删除build目录,再重新安装.
 
+====自动执行mysql脚本
+    DB="xizhi_prod_test"
+    MYSQL=$(which mysql)
+    USER="root"
+    PASS="LBS20120525"
+    DB_SCRIPTS="fixtures/update_script.sql"
+
+    $MYSQL -u $USER -p$PASS $DB -e "SOURCE $DB_SCRIPTS"
+
 
 
 

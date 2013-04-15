@@ -400,6 +400,11 @@ http://docs.celeryproject.org/en/latest/index.html
     need a Broker: RabbitMQ/Redis/Using a database
 
 
+icon:
+192.168.1.50/Lershare/templates/htmlCodeTest/icon.html
+
+club home
+192.168.1.50/Lershare/templates/htmlCodeTest/clubHome.html
 
 
 
