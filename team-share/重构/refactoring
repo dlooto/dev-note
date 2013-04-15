@@ -1,0 +1,193 @@
+Roadmap
+
+什么是重构？
+重构的意义
+Smell Code与常见重构方法
+重构的正确时机
+重构与设计
+
+
+参考资料
+Summary:
+    重构意义
+    常见重构方法
+    重构正确时机
+    重构与设计关系
+
+＝＝＝引子
+"解决一个问题,常会引入新的问题.新问题是否处于更高级阶段,往往检验解决方法是否有效".
+手痒心痒，挖坑也要系统化进行
+
+
+分享目的:　抛砖引玉,在开发过程中去实战,并深入学习,改进代码的质量.
+　　强调重构对于代码质量/项目成功的重要性,基础的重构理论与方法    
+    (而更多的细节与深入,需要团队未来不断去学习)
+不涉及:设计模式,架构级别的大型重构(如,工程解藕)
+
+＝＝＝什么是重构？
+本质：代码写好之后改进它的设计
+ 重构三要素：
+ 1.  调整代码内部结构，（做什么）
+  2. 不改变代码原有功能与行为，（不做什么）
+  3. 提高代码可理解性，降低维护与修改成本（目的）
+
+＝＝＝重构的意义
+重构很花时间,精力, 有时是吃力不讨好,为什么还要做它?
+古老的工程学格言: 如果它没有坏，就别动它。
+擦干净窗户，你可以看得更远。
+
+软件是有机生命体.软件生命周期中，设计是逐渐浮现出来的，设计会腐化，代码会膨胀，人员会流动，不同人接手代码（
+   编码风格不一，虽然有编码规范）
+
+（好的代码是不断修改出来的）
+重构之道，防患未然
+    －－问题代码是一种债务，借债使自己运转（让程序跑起来），但借债越多就得付利息，复杂的代码的维护成本极大。
+
+
+===Smell Code与重构方法
+重复代码
+    代码中的变化扩散,不利于修改,扩展　　---例:if-else,　各分支大部分内容几乎相同,但关键有不同的地方,
+
+过大类/过长函数
+    account/views.py/callback()　
+
+过多注释
+    汇编,Ｃ等编程时,会有较多注释--因代码太精简
+    逻辑或算法太复杂,　没有更好地提取出函数,没有合理地命名
+    注释时机:　为什么这样做,　不知道做什么
+
+过长参数列表(如4个以上)
+    不利于变化,扩展
+    *args, **kwargs(不利于代码清晰,　得需要额外的注释)
+    考虑封装成对象(封装变化)     
+
+函数依恋(Feature Envy)
+    函数对某class兴趣大于对自己所处class的兴趣,例:　act.addComment() or profile.addComment() ?
+    原则:　将一起变化的东西放在一起,　数据和操作这些数据的行为一起变化.
+
+过多复杂的算法分支
+    def hello():    
+        ## place one
+        if salary <= 2000:
+            calTax1()
+        elif salary > 2000 and salary <=10000:
+            calTax2()
+        elif salary > 10000:
+            calTax3()
+
+    def execute():
+        ## place two
+        if salary <= 2000:
+            foo1()
+            # some other code1
+        elif salary > 2000 and salary <=10000:
+            foo2()
+            # some other code2
+        elif salary > 10000:
+            foo3()
+            # some other code3
+
+    解决方法:
+        Replace Type code with strategy: 
+        解决太多if-else算法分支问题
+
+
+不完善的程序类库 Incomplete Library Class
+    已有包或库功能不能满足需求,　该怎么做?　
+    委托取代继承:　比较subclassing, wrapping差异
+    
+
+一些重构方法与建议　----结合项目中的真实案例
+    一开始重构是小步进行的
+    不要对参数赋值
+    if-else卫语句(例:我的代码里else较少)
+    查询与修改分离:查询函数/修改函数
+        
+典型重构动作:
+    变量,函数,类等重命名
+    提取方法(原则依据:都是高内聚,一起变化的东西放一起,同逻辑单元的代码放一起)
+    分拆类/提取类
+    类的扩展/方法重写
+
+
+＝＝＝重构的正确时机：
+前提：有足够的时间，人手，财力来支持对项目进行回归、验证测试
+    添加新特性时，现有代码结构让你不方便进行
+    理解不熟悉的代码时
+    重复第二次做类似事情
+    修补错误时
+    评审代码时
+    为了改进设计时
+
+Kent Beck的两顶帽子： 
+    添加新特性时不应该重构  (拿到功能,你首先想到的是迅速正确地实现功能,然后要考虑重构.当然有经验者, 代码质量会更高更符合设计.)
+    重构时别添加新功能
+
+ ＝＝＝不该重构的时机
+项目已近最后期限
+逻辑复杂,你没有花时间去分析
+你不理解为什么前任程序员要这样编写。
+团队里的新成员，或新接触这个项目(或为新接触语言）
+
+
+＝＝＝重构与设计
+需要了解设计原则,学习设计模式
+设计是不断演化并浮现的（随着不断重构，设计逐渐显现出来）
+代码不断重构，会造成原始设计腐化（后果：要么设计进行重构、升级，要么代码及设计变得膨胀与失控）
+设计与性能无法兼顾时： 偏于设计（良好的程序结构与可扩展性），兼顾性能
+关于建模与模型：
+    抽象与聚焦
+    模型3要素:　属性,行为,关系
+    Modeling focus is on What, not How.
+    Value Object与Entity Object区分
+Composition(组合)/Aggregation(聚合)/Delegation（委托）  <---Inheritance
+Architecture(架构) －－－整系统结构建模
+    Design Structure －－结构（形式）
+    Hightlights the Most important parts in project
+    The relationships between those parts    
+
+The Risk in Software Development:
+    Forgetting an important requirement is always a risk
+    Building the wrong thing is a risk
+    Reducing risk is in the requirements phase
+    
+软件开发不只是写代码：
+    做计划，对自己的工作进行管理／设定目标，学会设计与架构知识，理解需求，学会降低风险－－》才能有优质、简单的代码
+
+
+What's Common?
+What's variable?--->封装
+
+If a design isn't flexible, then CHANGE IT! Never settle on bad design.
+好的设计目标： 高内聚，低藕合
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
