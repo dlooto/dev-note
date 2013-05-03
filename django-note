@@ -1493,6 +1493,9 @@ args = ( Q( title__icontains = 'Foo' ) | Q( title__icontains = 'Bar' ) )
 entries = Entry.objects.filter( *args, **kwargs )
 
 
+
+>>> Entry.objects.order_by('pub_date').distinct('pub_date')
+
 =====清理session
 Clearing the session table
 

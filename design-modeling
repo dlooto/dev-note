@@ -215,6 +215,32 @@ QuerySet的缓存机制
     >>>entry.blog_id #应该使用这种方式
     >>>entry.blog.id #不要使用这种方式
 
+====mysql优化
+mysql连接有个优化原则，小表连大表。
+
+mysql多表连接:
+1. 笛卡尔积(交叉连接) 在MySQL中可以为CROSS JOIN或者省略CROSS即JOIN，或者使用','  如： 
+SELECT * FROM table1 CROSS JOIN table2   
+SELECT * FROM table1 JOIN table2   
+SELECT * FROM table1,table2  
+
+ 由于其返回的结果为被连接的两个数据表的乘积，因此当有WHERE, ON或USING条件的时候一般不建议使用，因为当数据表项目太多的时候，会非常慢。一般使用LEFT [OUTER] JOIN或者RIGHT [OUTER] JOIN
+
+2.   内连接INNER JOIN
+在MySQL中把INNER JOIN叫做等值连接，即需要指定等值连接条件在MySQL中CROSS和INNER JOIN被划分在一起。 join_table: table_reference [INNER | CROSS] JOIN table_factor [join_condition]
+
+3. MySQL中的外连接
+分为左外连接和右连接，即除了返回符合连接条件的结果之外，还要返回左表(左连接)或者右表(右连接)中不符合连接条件的结果，相对应的使用NULL对应。
+
+http://blog.csdn.net/hguisu/article/details/5731880   ---多表连接列子
+Tips:
+1. on a.c1 = b.c1 等同于 using(c1)
+2. INNER JOIN 和 , (逗号) 在语义上是等同的
+3. 当 MySQL 在从一个表中检索信息时，你可以提示它选择了哪一个索引。
+如果 EXPLAIN 显示 MySQL 使用了可能的索引列表中错误的索引，这个特性将是很有用的。
+通过指定 USE INDEX (key_list)，你可以告诉 MySQL 使用可能的索引中最合适的一个索引在表中查找记录行。
+可选的二选一句法 IGNORE INDEX (key_list) 可被用于告诉 MySQL 不使用特定的索引。如：
+
 
 
 

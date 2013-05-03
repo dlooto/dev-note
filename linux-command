@@ -1604,3 +1604,7 @@ ifconfig eth0 hw ether xx:xx:xx:xx:xx:xx                #更改MAC地址
 =====linux开机自启动
 需要在 /etc/init.d/目录下创建一个脚本文件
 
+    sudo update-rc.d -f apache2 remove  --删除apache2开机自启动
+
+
+find . -type f -name "*.h" -o -name "*.m" -exec cat {} \; >all_files2.txt 

@@ -249,7 +249,7 @@ create a new project in gerrit, and setup the accessrights(normally inherit from
 git remote add gerrit ssh://jun.xiong@192.168.1.114:29418/lershare.engine.git
     --git remote rm gerrit ---if created, use this cmd remove it
 vi .git/config  --in ~/work/repos/repo.lershare.engine dir
-git pull gerrit -- pull from 
+git pull gerrit -- dfpull from 
 git push gerrit --将现有的仓库 push 至新的远端仓库gerrit(or git push gerrit master)
  
 in .git/config add following line:
@@ -295,7 +295,18 @@ $GERRIT_BRANCH
 
 git show aca69cdd76a4a7ab96be3309bf99bb5d975d3684   --根据sha值显示changes(根据sha值显示变更)
 ------------------------------------------------------------------------------------
-.
+
+====it回退版本——恢复所有文件
+由于git 没有svn方便的update to revision功能，所以只能另寻替代功能了。
+如果你要干干净净地回到之前某个版本，在此之后的所有提交都不需要保留。那么简单地进行reset即可：
+    $ git reset --hard <commit>
+或
+    $ git checkout <commit>
+
+<commit>为你要退回的版本号。但是如果你只是想回去查看一下以前的代码，看完后需要回到最新的HEAD上来，
+有两种方法：
+    一是reset前先记住当前HEAD的commit号，用git checkout命令时也会有提示当前HEAD号的功能。当然这样做有风险，万一忘了HEAD号退不回去了，那就万事over了；
+    二是git reset前先建一个新的branch，在新branch上随便你折腾，最后删除这个不用的branch即可；推荐用二。
 .
 .
 ----------------------------------------------------------------------------------- 

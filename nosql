@@ -77,6 +77,10 @@ Dlooto2012-12-06 14:43:53
 张冬2012-12-06 14:44:45	
     在准备的时候取一下关注者数嘛 
 
+====redis
+
+
+
 
 pip install python-memcached
 
@@ -118,5 +122,152 @@ def my_view(request):
 
 clear() will remove everything from the cache, not just the keys set by your application.
 cache.clear()
+
+
+====redis install
+download and extract package
+cd redis-xxx/src
+make install
+cd utils
+sudo ./install_server
+--use all default sets
+
+pip install -i http://192.168.1.114:8088/simple django-redis
+
+====use redis
+>>redis-cli -h 192.168.1.114 -p 6379    --具体用法  --help
+    monitor  --实时查看redis数据存储情况 
+    redis-cli -n 1   --指定db编号
+    FLUSHALL         --刷新缓存
+redis-benchmark   --可进行基准测试 
+
+
+
+setex(key, time, value)：向库中添加string（名称为key，值为value）同时，设定过期时间time  --对String的操作
+
+==cache usage:
+from django.core.cache import cache
+cache.set(key, value)
+cache.set(key, value, timeout)
+cache.get(key)
+
+>>> cache.set_many({'a': 1, 'b': 2, 'c': 3})
+>>> cache.get_many(['a', 'b', 'c'])
+{'a': 1, 'b': 2, 'c': 3}
+
+>>> cache.delete('a')
+
+>>> cache.delete_many(['a', 'b', 'c'])
+
+==cache key:
+def make_key(key, key_prefix, version):
+    return ':'.join([key_prefix, str(version), key])
+
+====Django session
+默认session被存储到DB.
+By default, Django stores sessions in your database (using the model django.contrib.sessions.models.Session). Though this is convenient, in some setups it’s faster to store session data on your filesystem or in your cache.
+
+    session存储在database-backed,由添加在INSTALLED_APPS中的'django.contrib.sessions'实现. 且 manage.py syncdb 安装数据库表
+
+为了更好的性能, 可以使用cache-based session backend.
+
+s = Session.objects.get(pk='xxxxxxxxxxxxx')
+s.session_data
+'KGRwMQpTJ19hdXRoX3VzZXJfaWQnCnAyCkkxCnMuMTExY2ZjODI2Yj...'
+s.get_decoded()
+{'user_id': 42}
+
+
+cache key 命名约定: app:itemkey:id
+
+==django session数据被保存时机
+默认, session中新加入key/value对,或任何数据被修改或删除, session数据将被存储到DB, 如下:
+    # Session is modified.
+    request.session['foo'] = 'bar'
+
+    # Session is modified.
+    del request.session['foo']
+
+    # Gotcha: Session is NOT modified, because this alters
+    # request.session['foo'] instead of request.session.
+    request.session['foo']['bar'] = 'baz'
+
+    可以显示告诉session被修改了:
+    request.session.modified = True
+
+if set:
+    SESSION_SAVE_EVERY_REQUEST = True
+  Django will save the session to the database on every single request.
+
+Note that the session cookie is only sent when a session has been created or modified. If SESSION_SAVE_EVERY_REQUEST is True, the session cookie will be sent on every request.
+session被创建或修改时,session cookie才会被发送到客户端.
+
+Similarly, the expires part of a session cookie is updated each time the session cookie is sent.  
+cookie每被发送到客户端一次, cookie的过期时间被更新.
+    Changed in Django 1.5: The session is not saved if the response’s status code is 500.
+
+配置项: SESSION_EXPIRE_AT_BROWSER_CLOSE  (浏览器长度 vs. 持久化session)
+    By default, SESSION_EXPIRE_AT_BROWSER_CLOSE is set to False, 浏览器关闭session不过期.
+
+==清理session存储
+sessoin数据会累积, 若用database backend, django_session数据库表将一直增长 .
+当用户login时, django添加一条记录到django_session表, 当session数据修改,django将每次更新该记录.若用户手动登出,
+django删除该记录.若用户未登出, 该记录将不会被删除.(用文件作为backend也一样)
+
+django没有提供自动清理过期session数据的机制,所以, 需自定义定时job来完成过期数据的清理.
+django提供了clearsessions命令可供使用, as a daily cron job.
+
+用cache backend不存在这个问题, 因为cache会自动删除掉过期数据.
+
+====redis使用策略
+存放以下数据到cache:
+    session数据
+    全局共享数据
+    每个用户当天需要频繁访问的数据, 可以在凌晨等时间提前放到redis
+    排名数据
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 

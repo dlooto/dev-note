@@ -380,7 +380,7 @@ models:
     Member <----> Unit   : m/m   
     Member <----> Title  : m/m
     Club   <----> Unit   : o/m
-    Club   <----> Title  : o/m
+    Unit   <----> Title  : o/m     ---后来修改
     
 django插件:google-analytics
     http://code.google.com/p/django-google-analytics/
@@ -405,6 +405,43 @@ icon:
 
 club home
 192.168.1.50/Lershare/templates/htmlCodeTest/clubHome.html
+
+一个人可以创建几个社团?
+
+
+加入/退出社团完善  --满
+完善[赞]功能   --满 
+招募的社团   --敬
+图片分享     --吕
+社团分享内容分页显示 --吕
+
+
+http://192.168.1.55/item/Lershare/templates/htmlCodeTest/
+
+===plan
+个人设置
+    点"关于", 图片/关于/动态 全部显示, 
+    3个tab: 动态/图片/关于
+    提取个人发布的图片, 针对活动的图片不显示在社团里
+       以活动/社团区分照片相册, 一个活动一个相册, 
+       社团内分享的图片,以社团为单位对图片进行分册
+        
+已切:
+
+    社团管理
+    创建社团
+    重置密码
+    关键字搜索社团/热门搜索
+    发布招募    --todo
+
+    创建活动 
+    我的活动页面: 查找/筛选活动/推荐社团/相关统计信息 
+    活动主页:
+    搜索活动页
+    
+====new field for model
+alter table t_club add column `is_public` bool NOT NULL;
+alter table t_club_title add column `unit_id` integer NOT NULL;
 
 
 

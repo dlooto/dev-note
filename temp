@@ -1,7 +1,22 @@
 
 
+两个方面: 
+同一个人进入到他加入的不同社团, 看到的动态相关数据应该是不一样的; 
+不同的人进入到加入的同一个社团,看到的动态数据也是不一样的. 
+
 敏捷开发之我见
     我的敏捷经历
     团队状况
     团队实施敏捷的过程
     疑问与困惑
+
+
+
+alter table t_membership add column `created_date` datetime NOT NULL;
+alter table t_membership add column `last_updated` datetime NOT NULL;
+
+alter table t_recruit add column `is_active` bool NOT NULL;
+alter table t_club_cate add column `school_id` integer;
+alter table t_share add column liked_count integer;
+
+alter table t_recruit add column `club_name` varchar(40) NOT NULL;

@@ -26,10 +26,9 @@ fagungis
 创建用户(如hello), 将其添加到sudoers组(即通过sudo具有super权限，如何添加参见-->)
 创建/home/hello/prod， /home/hello/media等目录
 安装MySQL及相关python依赖：
-      sudo apt-get install mysql-server
-      sudo apt-get install python-setuptools libmysqlclient-dev 
-                  --to solve "mysql_config" not found
-      sudo apt-get install python-pip python-dev build-essential     --important
+      sudo apt-get install build-essential python-dev python-setuptools mysql-server libmysqlclient-dev 
+                  --install libmysqlclient-dev to solve "mysql_config" not found
+      sudo apt-get install python-pip  --maybe this is not required
 
 安装git（或hg)
 
@@ -341,8 +340,40 @@ pip install -U -i $PACKAGE_URL $PACKAGE_NAME
     $MYSQL -u $USER -p$PASS $DB -e "SOURCE $DB_SCRIPTS"
 
 
+====lershare部署安装步骤(精简版)
+1.确保基础环境已设置
+    创建新linux user(sudoers权限)    
+    apt-get update
+    安装以下程序及包, using [apt-get install]: 
+        git build-essential python-dev python-setuptools mysql-server libmysqlclient-dev 
+        python-software-properties python-pip supervisor
+        
+2.安装nginx/gunicorn     
+3.pip install fagungis  --to use fab cmd
+4.puts fabfile.py into user home(like: /home/user/, change some settings)
 
+5.fab mysite setup(in task.py), do followings:
+    verify_sudo
+    setup projects directories
+    install and create virtualenv
+    upload nginx conf/supervisorctl conf/rungunicorn script
 
+6.确认是否有配置文件需要备份? 如果已部署过一次的话
+7.git clone ssh://jun.xiong@192.168.1.114:29418/lershare.web.git projects/  -- cd ~/prod
+8.pip Install requirement  ---manually
+
+9.fab mysite deploy( in task.py), do followings:
+    prepare : do manage.py syncdb/migrate/collectstatic, etc
+    prepare media path
+    supervisorctl restart 
+
+10. if error, modify ~/prod/scripts/rungunicorn_lershare-web.sh
+
+11. check 文件存储目录是否已创建: media/img/.../等 
+12. check lershare-engine包是否最新,否则重新打包上传
+ 
+check nginx cache setup and related dirs (/data/nginx/cache/)
+nginx 对于静态文件 ,默认会开启缓存吗?(即不设置proxy_cache的情况下)
 
 
 

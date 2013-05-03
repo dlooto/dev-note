@@ -91,13 +91,13 @@ Nginx是多进程程序，80端口是各进程所共享的，多进程同时list
 A:
 用两个server就可以了。
     server {
-    server_name domian.com;
-    root /wwwdoc/myweb;
+        server_name domian.com;
+        root /wwwdoc/myweb;
     }
 
     server {
-    server_name img.domian.com;
-    root /wwwdoc/img;
+        server_name img.domian.com;
+        root /wwwdoc/img;
     }
 
 
@@ -204,18 +204,19 @@ server {
     location / {
         root   /home/demo/public_html/domain1.com/public/;
         index  index.html;
-        }
+    }
 }
 
 ===nginx location指令
     http://wangyan.org/blog/nginx-location.html  ---详
 
     location [=|~|~*|^~|@] /uri/ { … }
-    〖=〗 表示精确匹配，如果找到，立即停止搜索并立即处理此请求。
-    〖~ 〗 表示区分大小写匹配
-    〖~*〗 表示不区分大小写匹配
-    〖^~ 〗 表示只匹配字符串,不查询正则表达式。
-    〖@〗 指定一个命名的location，一般只用于内部重定向请求。
+        =  精确匹配，如果找到，立即停止搜索并立即处理此请求。
+        ~  区分大小写匹配
+        ~* 不区分大小写匹配
+        ^~ 只匹配字符串,且以字符串开头,不查询正则表达式。
+        @  指定一个命名的location，一般只用于内部重定向请求。
+        !~和!~*分别为区分大小写不匹配及不区分大小写不匹配
 
     如果字符串和正则都匹配，那么正则优先级较高
 
@@ -306,6 +307,8 @@ nginx rewrite中支持4种类型的转向：
 跳转型的
 redirect：302跳转到rewrite后的地址
 permanent：301永久定向到rewrite后的地址，对搜索引擎更友好
+
+Http 协议缺省有个 302 返回，是告诉浏览器文件没有发生修改，你不用来下载。
 
 代理型的
 last：重新将rewrite后的地址在server标签中执行
@@ -421,6 +424,140 @@ server {     　　　　 定义虚拟主机,第一个虚拟主机,反向代理m
     access_log /var/log/nginx/message.access;
 }  
 
+====nginx缓存(cache)
+把URL及相关组合当作key,用md5算法结key进行hash,得到硬盘上对应的hash目录路径,从而将缓存内容保存在该目录内.
+
+
+
+nginx.conf中进行以下配置:
+
+http {
+    proxy_cache_path  /data/nginx/cache  levels=1:2    keys_zone=STATIC:10m
+                                         inactive=24h  max_size=1g;
+    server {
+        location / {
+            proxy_pass             http://1.2.3.4;
+            proxy_set_header       Host $host;
+
+            proxy_cache            STATIC;
+            proxy_cache_valid      200  1d;
+            proxy_cache_use_stale  error timeout invalid_header updating
+                                   http_500 http_502 http_503 http_504;
+        }
+    }
+}
+
+说明：
+1、http段设置。
+proxy_cache_path /home/cache levels=1:2 keys_zone=STATIC:200m inactive=1d max_size=10g;
+    levels:设置缓存目录为两层hash目录,第一层为1个字母,第二层为2个字母,保存的文件名会类似/data/nginx/cache/c/29/asdfas98df8asdfasdf;
+    keys_zone: 给缓存区起名,200m指内存缓存区大小，
+    inactive: 1d指缓存数据在1天内没有被访问,则删除
+    max_size: 最大容量，指硬盘缓存空间为30GB
+
+2、server段设置
+请求静态文件设置。
+proxy_cache STATIC;  --设置缓存内存区块，也就是keys_zone名称。
+proxy_cache_valid 200 302 1h;   --对不同返回状态码的URL设置不同的缓存时间, 设置http状态码为200,302缓存时间为1小时。
+proxy_cache_valid 404 1h;
+
+expires 30d;设置失期时间，为30天
+
+==缓存key,置于 locatioin段内:
+proxt_cache_key $host$uri$is_args$args;
+
+
+==清除缓存
+假设一个URL为http://my.domain.com/test.jpg, 通过访问 http://my.domain.com/purge/test.jpg可清除该URL的缓存.
+location ~ /purge(/.*) {
+    #仅允许指定IP或IP段可清除URL缓存
+    allow 127.0.0.1;
+    allow 192.168.0.0/16;
+    deny  all;
+    proxy_cache_purge     STATIC  $host$1$is_args$args;
+}
+
+
+====
+if($host ~* ^media1\.lershare\.com) {    #"不区分大小写"匹配
+    set $var '1';
+}
+if($var !~ '1') {
+    return 403;
+}
+
+if ($host !~* ^media1\.lershare\.com) {    #不区分大小写不匹配
+    set $var '1';
+}
+
+#禁止非media1.lershare.com子域名访问, 该代码片段应置于server{}中.
+if ($host !~* ^media1\.lershare\.com) {
+        return 403;
+}
+
+
+
+server {
+    listen 80;
+    server_name www.abc.com;
+    index 555.html;
+    root /home/laiju/;
+}
+
+server {
+    listen 80;
+    server_name m1.abc.com;
+
+    if ($host !~* ^m1\.abc\.com) {
+        return 403;
+    }
+
+
+    location /static/ {
+        root /home/topd/me/
+    }
+}
+
+为何没办法把所有 xxx.abc.com的子域名访问全部禁掉呢? 只允许m1.abc.com可用
+
+
+Nginx负载均衡一些基础知识:
+
+    nginx 的 upstream目前支持 4 种方式的分配
+    1)、轮询（默认）
+          每个请求按时间顺序逐一分配到不同的后端服务器，如果后端服务器down掉，能自动剔除。
+    2)、weight
+          指定轮询几率，weight和访问比率成正比，用于后端服务器性能不均的情况。
+    2)、ip_hash
+          每个请求按访问ip的hash结果分配，这样每个访客固定访问一个后端服务器，可以解决session的问题。 
+    3)、fair（第三方）
+          按后端服务器的响应时间来分配请求，响应时间短的优先分配。 
+    4)、url_hash（第三方）
+
+配置：
+
+    在http节点里添加:
+    #定义负载均衡设备的 Ip及设备状态
+
+    upstream myServer {   
+
+        server 127.0.0.1:9090 down;
+        server 127.0.0.1:8080 weight=2;
+        server 127.0.0.1:6060;
+        server 127.0.0.1:7070 backup;
+    }
+
+    在需要使用负载的Server节点下添加
+
+    proxy_pass http://myServer;
+
+    upstream 每个设备的状态:
+
+    down 表示单前的server暂时不参与负载
+    weight  默认为1.weight越大，负载的权重就越大。
+    max_fails ：允许请求失败的次数默认为1.当超过最大次数时，返回proxy_next_upstream 模块定义的错误
+    fail_timeout:max_fails 次失败后，暂停的时间。
+    backup： 其它所有的非backup机器down或者忙的时候，请求backup机器。所以这台机器压力会最轻。
 
 
 

@@ -1,0 +1,73 @@
+
+TODOs: 
+
+how to 清空redis缓存
+img_util整理
+django查询优化与性能分析    ---分享
+    mysql多表查询优化, join等分析 
+    相关性能分析工作与手段    
+
+熟悉当前开发状况, 清理代码, 任务合理划分,任务分工考虑
+
+MongDB及图片存储深入研究
+更优技术架构演化方案选择研究
+
+考虑:
+   将nginx安装/配置与gunicorn安装配置分开
+   建立prod目录结构, 配置gunicorn启动环境
+
+Memcached/Redis深入研究与使用
+系统状态监控:IO操作/DB连接数/CPU,MEM是否过载/请求数瓶颈
+检查:114上lershare数据是否多次初始化
+nginx/gunicorn优化配置研究
+
+全文检索引入(搜索引擎)--Lucence
+消息队列引入与使用--Celery
+更优DB备份与恢复技术研究
+
+API开发/及相关安全机制(OAuth2)
+团队长远技术发展与人力配比优化
+
+是否双server分离: admin/lershare
+
+续读 <高性能Web站点>:　笔记,　熟悉ab使用   
+整理一些遗留脏代码
+nginx  限制并发访问 limit_conn
+
+整理上线前Checklist: 
+       check user and profile create 
+        整理升级脚本
+        添加flush cache item 管理页面...
+        日志/DB访问正常/数据初始化正常/ab测试正常/...
+        unittests执行正常/
+       上线前对时间 
+
+unittests 不应依赖于manage.py test 运行, 因需要settings.py
+Unittest时DEBUG=False, open mem db created
+
+前端页面缓存技术??
+
+
+
+
+DONE:
+cache策略研究, session放缓存问题
+nginx缓存研究
+本地搭建nginx+gunicorn环境
+写: 备份配置文件脚本
+前端优化: 动静内容分离与二级域名/相关nginx配置
+LVM数据备份与恢复  --暂用mysqldump解决
+分离出base.py/local_settings.py/prod.py等, 则都可进入版本库...  
+将tempate_settings移到common/consts 
+全局数据初始化不应该放在__init__.py里--->maybe in syncdb steps...
+syncdb直接增/减model字段                  --man
+
+jenkins如何输入密码及交互
+  架构与设计: 核心模型
+  Sprint计划会议
+  重构Profile设计
+  整理activity model
+  编码规范
+  web工程直接引用engine工程
+  读 Django Multi-table继承
+  成长线设计

@@ -106,4 +106,7 @@ school数据初始化依赖于city, 所以city数据的创建需要放在school�
 解决:  添加"clubs"解决
 
 
+====114 prod env 反复的 command not found: manage.py run_gunicorn 问题
+原因 :
+
 

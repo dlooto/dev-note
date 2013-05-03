@@ -1,0 +1,104 @@
+
+=====python/shell脚本/fabric使用===
+
+
+from : http://www.yeolar.com/note/2012/09/23/fabric/
+
+Fabric function:
+1. 通过命令行执行Python函数。
+2. 以更简单Python式的方式执行SSH命令
+
+==定义fabfile:
+一般创建fabfile.py，或者创建fabfile目录，其中包含__init__.py.
+或者可以用 -f 参数指定不叫“fabfile”的文件作为fabfile，还可以在~/.fabricrc中添加 fabfile = <fab file>.py
+
+
+==示例:
+
+from fabric.api import *
+from fabric.contrib.console import confirm
+
+env.hosts = ['my_server']
+
+def test():
+    with settings(warn_only=True):
+        result = local('./manage.py test my_app', capture=True)
+    if result.failed and not confirm("Tests failed. Continue anyway?"):
+        abort("Aborting at user request.")
+
+def commit():
+    local("git add -p && git commit")
+
+def push():
+    local("git push")
+
+def prepare_deploy():
+    """测试并更新到Git"""
+    test()
+    commit()
+    push()
+
+def deploy():
+    """部署应用"""
+    code_dir = '/srv/django/myproject'
+    with settings(warn_only=True):
+        if run("test -d %s" % code_dir).failed:
+            run("git clone user@vcshost:/path/to/repo/.git %s" % code_dir)
+    with cd(code_dir):
+        run("git pull")
+        run("touch app.wsgi")
+
+其中：
+
+    local 执行本地shell命令。 run 执行远程命令。
+    Fabric会自动处理错误，遇到错误时，默认和shell的行为相同。可以通过检查命令运行的结果来改变错误的处理方式。
+    settings 用于创建一个上下文环境。
+    env.hosts 可以指定远程主机列表，命令将在这些主机上执行。
+
+所以上面的例子中，执行 fab prepare_deploy 和 fab deploy 会分别在本地和 my_server 上执行。
+
+
+====
+环境字典env
+
+Fabric中通过一个Python字典的子类来设置环境，它是一个全局的单例 fabric.state.env ，包含在 fabric.api 中。
+
+Fabric的大部分行为可以通过修改 env 变量来控制。如果不希望全局生效，可以通过 settings 上下文管理器来改变代码块的环境设置。
+
+env 可以像字典那样使用，同时也支持按属性方式访问。
+
+env 变量的完整列表见官方文档 Full list of env vars ，推荐使用 settings 和 cd 这样的上下文管理器来修改它们。
+
+====
+执行模型
+
+Fabric默认的执行方式是：创建一个任务列表，每个任务有一个特定的主机列表，依次执行任务，每个任务在它的每个主机上执行一次，主机列表中没有主机的任务视作本地任务，执行一次。
+
+这种简单的方式符合脚本执行的习惯，因此可以利用之前的执行结果来决定下一步的工作。
+
+
+fab set_hosts mytask   --将依次执行set_hosts, mytask任务
+
+from fabric.api import hosts, run
+
+@hosts('host1', 'host2')   --给任务加装饰器, 以指定在哪些host上执行命令
+def mytask():
+    run('ls /var/www')
+
+
+Fabric在连接主机时，是即时的，而且会缓存已建立的连接。Fabric不会自动关闭连接，所以在程序的最后要用 disconnect_all 来手动关闭所有的连接。
+
+====直接执行shell命令
+fab -H localhost -- uname -a    (--后的内容会转换成一个run调用)
+
+
+
+
+
+
+
+
+
+
+
+

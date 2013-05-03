@@ -1,0 +1,95 @@
+
+====MYSQL====
+
+MySQL LIMIT :
+... LIMIT offset , rows
+offset表示偏移量（指向数据记录的游标），rows表示查询限定返回的最大记录数，这两个参数必须为整数
+
+tips:
+当你确认查询结果只有一条数据时（如核对用户名密码），可以加上LIMIT 1的限制条件，当系统查询到一条数据后即停
+止搜索而不会继续查找下一条记录，这样可有效提高查询效率。
+
+
+====Django QuerySet:
+No database activity actually occurs until you do something to evaluate the queryset.
+什么时候QuerySet被计算?　以下情况将发生:
+
+1.Iteration
+    for e in Entry.objects.all():
+    print(e.headline)
+2.Slicing
+ Slicing an unevaluated QuerySet usually returns another unevaluated QuerySet.
+but Django will execute the database query if you use the “step” parameter of slice syntax, and will return a list.
+
+3.Pickling/Caching
+4.len(). A QuerySet is evaluated when you call len() on it.
+5.list(). Force evaluation of a QuerySet by calling list() on it.
+    entry_list = list(Entry.objects.all())
+
+
+
+>>> Entry.objects.order_by('pub_date').distinct('pub_date')
+
+>>> Blog.objects.values()
+[{'id': 1, 'name': 'Beatles Blog', 'tagline': 'All the latest Beatles news.'}],
+
+>>> Blog.objects.values('id', 'name')  -        --返回字典对象,　而非模型实例对象
+[{'id': 1, 'name': 'Beatles Blog'}]
+
+>>> Entry.objects.values_list('id', 'headline')　　　--与values类似,　但返回元组
+[(1, u'First entry'), ...]
+
+>>> Entry.objects.values_list('id').order_by('id')　　　---要查询得某个特定field值列表(而非model对象列表),可以用该values_list
+[(1,), (2,), (3,), ...]
+
+>>> Entry.objects.values_list('id', flat=True).order_by('id')
+[1, 2, 3, ...]
+
+# Returns the total number of entries in the database.
+Entry.objects.count()　
+
+Entry.objects.latest('pub_date')
+
+if some_queryset.filter(pk=entry.pk).exists():
+    print("Entry contained in queryset")
+
+====Aggregate 求和,平均值等计算
+https://docs.djangoproject.com/en/dev/topics/db/aggregation/
+
+>>> q = Blog.objects.aggregate(Count('entry'))  
+{'entry__count': 16}
+
+>>> q = Blog.objects.aggregate(number_of_entries=Count('entry'))
+{'number_of_entries': 16}
+
+# Average price across all books.
+>>> from django.db.models import Avg
+>>> Book.objects.all().aggregate(Avg('price'))
+{'price__avg': 34.35}
+
+# Max price across all books.
+>>> from django.db.models import Max
+>>> Book.objects.all().aggregate(Max('price'))
+{'price__max': Decimal('81.20')}
+
+>>> from django.db.models import Avg, Max, Min, Count
+>>> Book.objects.aggregate(Avg('price'), Max('price'), Min('price'))
+{'price__avg': 34.35, 'price__max': Decimal('81.20'), 'price__min': Decimal('12.99')}
+
+
+>>> q = Blog.objects.annotate(Count('entry'))　　--Blog 模型并没有定义entry__count属性(及下方的number_of_entries),　
+                                                 --但通过annotate可以指定一个计算结果给模型实例
+>>> q[0].name
+
+>>> q[0].entry__count
+
+>>> q = Blog.objects.annotate(number_of_entries=Count('entry'))
+>>> q[0].number_of_entries
+
+
+he Blog model doesn’t define an entry__count attribute by itself, but by using a keyword argument to specify the aggregate function, you can control the name of the annotation:
+
+
+
+
+
