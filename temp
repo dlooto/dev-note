@@ -10,13 +10,60 @@
     团队实施敏捷的过程
     疑问与困惑
 
+TODO：
+整理生产环境搭建步骤：nginx/gunicorn等安装配置
+
+Pinterest架构发展：
+    http://blog.jobbole.com/38554/
+
+何时选择分片？
+当有几TB的数据时，应该尽快分片。
+当表行数达到几十亿，索引超出内存容量，被交换到磁盘时
+他们选出一个最大的表，放入单独的数据库
+单个数据库耗尽了空间
+然后，只能分片
+
+分片的过渡？
+* 过渡从一个特性的冻结开始。
+
+* 确认分片该达到什么样的效果——希望尽少的执行查询以及最少数量的数据库去呈现一个页面。
+
+* 剔除所有的MySQL join，将要做join的表格加载到一个单独的分片去做查询。
+
+* 添加大量的缓存，基本上每个查询都需要被缓存。
+
+* 这个步骤看起来像：
+
+* 1 DB + Foreign Keys + Joins
+* 1 DB + Denormalized + Cache
+* 1 DB + Read Slaves + Cache
+* Several functionally sharded DBs+Read Slaves+Cache
+* ID sharded DBs + Backup slaves + cache
+
+    * 早期的只读奴节点一直都存在问题，因为存在slave lag。读任务分配给了奴节点，然而主节点并没有做任何的备份记录，这样就像一条记录丢失。之后Pinterest使用缓存解决了这个问题。
+
+    * Pinterest拥有后台脚本，数据库使用它来做备份。检查完整性约束、引用。
+
+    * 用户表并不进行分片。Pinterest只是使用了一个大型的数据库，并在电子邮件和用户名上做了相关的一致性约束。如果插入重复用户，会返回失败。然后他们对分片的数据库做大量的写操作。
 
 
-alter table t_membership add column `created_date` datetime NOT NULL;
-alter table t_membership add column `last_updated` datetime NOT NULL;
 
-alter table t_recruit add column `is_active` bool NOT NULL;
-alter table t_club_cate add column `school_id` integer;
-alter table t_share add column liked_count integer;
 
-alter table t_recruit add column `club_name` varchar(40) NOT NULL;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
