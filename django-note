@@ -1524,6 +1524,7 @@ class Province(models.Model):
     apps/
         --__init__.py --各INSTALLED_APPS包文件
 
+    django是动态载入相关模块(installed_apps),类及函数
   
         
 
@@ -1553,6 +1554,121 @@ syncdb --settings=local_settings   (only do once)
 5.修改完model以后，cmd执行：(有修改,则执行如下命令)
     python manage.py schemamigration app_name --auto  (commit changes,  生成)
     python manage.py migrate app_name                 (make changes work)  
+
+
+====https://docs.djangoproject.com/en/dev/howto/initial-data/  --数据初始化
+
+====python编码规范及性能优化
+http://my.oschina.net/xianggao/blog/102600  --very nice
+
+====python module模块搜索路径
+模块的搜索路径都放在了sys.path列表中，如果缺省的sys.path中没有含有自己的模块或包的路径，可以动态的加入（sys.path.apend）即可。
+
+1. 运行Python命令时，首先查找pythonHome，如果找到了PythonHome，注册表中的PythonPath将被忽略；否则将注册表的PythonPath加入。
+2.如果PYTHONPATH环境变量存在, sys.path肯定会加载此变量指定的目录
+3.若PythonHome在另外一个目录(不同的目录,比如通过comd嵌入到其他程序), 将不查找PythonHome, 此时注册表的pythonpath将被使用
+4.若Python命令不能发现他的主目录（PythonHome），并且注册表也没有PythonPath，则将加入缺省的相对目录.
+
+====import 机制 (模块载入机制)
+http://blog.csdn.net/kernelspirit/article/details/3381666   --nice
+
+Python中所有加载到内存的模块都放在sys.modules.
+当import一个模块时首先会在这个列表中查找是否已经加载了此模块，如果加载了则只是将模块的名字加入到正在调用import的模块的Local名字空间中。
+如果没有加载则从sys.path目录中按照模块名称查找模块文件，模块文件可以是py、pyc、pyd，找到后将模块载入内存，并加入到sys.modules中，并将名称导入到当前的Local名字空间。
+
+*******一个模块不会重复载入
+多个不同的模块都可以用import引入同一个模块到自己的Local名字空间，其实背后的PyModuleObject对象只有一个(即
+在sys.modules里只有一份)
+
+==嵌套Import
+本模块导入A模块（import A），而A中又有一个import B，而B模块又可以import其他模块，一直下去...
+各个模块的Local名字空间是独立的
+本模块import A完了后本模块只能访问模块A，不能访问B及其他模块。
+虽然模块B已经加载到内存了，如果要访问还要在明确的在本模块中import B。
+
+
+
+[A.py]
+from B import D
+class C:pass
+
+[B.py]
+from A import C
+class D:pass
+
+为什么执行A时不能加载D? 原因如下:
+
+具体到from B import D，Python内部会分成几个步骤：
+    在sys.modules中查找符号"B"
+    如果符号B存在，则获得符号B对应的module对象<module B>
+        从<module B>的__dict__中获得符号"D"对应的对象，如果"D"不存在，则抛出异常 
+
+    如果符号B不存在，则创建一个新的module对象<module B>，注意，这时，module对象的__dict__为空
+        执行B.py中的表达式，填充<module B>的__dict__
+        从<module B>的__dict__中获得"D"对应的对象，如果"D"不存在，则抛出异常 
+
+解决: 在A.py可直接import B
+
+1、执行A.py中的from B import D
+    由于是执行的python A.py，所以在sys.modules中并没有<module B>存在，
+    首先为B.py创建一个module对象(<module B>)，
+      注意，这时创建的这个module对象是空的，里边啥也没有，
+    在Python内部创建了这个module对象之后，就会解析执行B.py，其目的是填充<module B>这个dict。
+
+2、执行B.py中的from A import C
+    在执行B.py的过程中，会碰到这一句，
+    首先检查sys.modules这个module缓存中是否已经存在<module A>了，
+    由于这时缓存还没有缓存<module A>，
+    所以类似的，Python内部会为A.py创建一个module对象(<module A>)，
+    然后，同样地，执行A.py中的语句
+
+3、再次执行A.py中的from B import D
+    这时，由于在第1步时，创建的<module B>对象已经缓存在了sys.modules中，
+    所以直接就得到了<module B>，
+    但是，注意，从整个过程来看，我们知道，这时<module B>还是一个空的对象，里面啥也没有，
+    所以从这个module中获得符号"D"的操作就会抛出异常。
+    如果这里只是import B，由于"B"这个符号在sys.modules中已经存在，所以是不会抛出异常的。
+
+
+IMPORT_NAME字节码命令的执行流程:
+    假设需要import A，那么虚拟机首先在sys.modules中查找是否已经load过A，
+    找到则返回该对象，命令结束;
+    如果没有找到，那么虚拟机会新建一个module对象，
+
+    然后向module对象中添加必要的属性（builtin等）,
+    然后用这个module中的dict作为globals（locals）执行A，
+    然后返回 
+
+===包的载入
+包（Package）可以看成模块的集合，只要一个文件夹下面有个__init__.py文件
+import包的时候查找的路径也是sys.path
+包导入的过程和模块的基本一致，只是导入包的时候会执行此包目录下的__init__.py而不是模块里面的语句
+如果只是单纯的导入包，而包的__init__.py中又没有明确的其他初始化操作，那么此包下面的模块是不会自动导入的。
+
+
+import os  --
+        
+
+reload(os)  
+    对已经加载的模块进行重新加载，一般用于原模块有变化等特殊情况，reload前该模块必须已经import过。
+reload会重新加载已加载的模块，但原来已经使用的实例还是会使用旧的模块，而新生产的实例会使用新的模块；reload后还是用原来的内存地址；不能支持from。。import。。格式的模块进行重新加载。
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

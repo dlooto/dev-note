@@ -444,12 +444,195 @@ alter table t_club add column `is_public` bool NOT NULL;
 alter table t_club_title add column `unit_id` integer NOT NULL;
 
 
-
-
+社团結构再建一个model?
+  ClubStructure:
    
 
+python manage.py loaddata fixtures/*.json --settings=settings.local
 
-          
+key                value
+share:img:maxsize  5 
+
+
+=====图片目录结构设置
+
+//默认图片
+按类型存放各自目录
+    default_landing_img.jpg
+    
+    default_logo_big.jpg
+    default_logo_normal.jpg
+    default_logo_small.jpg
+    
+    default_recruit_big.jpg
+    default_recruit_normal.jpg
+    default_recruit_small.jpg
+    
+    default_pic_big.jpg
+    default_pic_normal.jpg
+    default_pic_small.jpg
+
+    default_act_poster_big.jpg
+    default_act_poster_normal.jpg
+    default_act_poster_small.jpg
+    
+
+
+//着陆页
+landings/
+
+//社团logo(包括招募, 不包括社团内分享的图片)
+clubs/
+    origin/
+    big/
+    normal/
+    small/
+
+//头像
+profiles/
+    cover/
+    origin/
+    big/
+    normal/
+    small/
+
+//活动海报
+activity/
+    origin/
+    big/
+    normal/
+    small/
+
+//分享相关图片, 包括社团内分享的图片, 基于某活动添加的图片分享
+shares/
+    origin/
+    big/
+    normal/
+    small/
+
+
+理事会作为一个unit在社团创建时默认创建, 添加职务时, 可以添加该职务到理事会  --?
+
+===srs
+个人主页动态: 
+    其他动态 ...
+    仅显示 xxx同意了你的请求,与你成为好友. 通知与动态均显示(通知内的该提醒一周后删除)
+    我同意了xxx的好友请求 
+
+Club管理设计:
+    think removing cache.set(clubKey, club), and what will happen ?  --TODO 
+
+Profiles设计参考:
+    进入个人主页后,加载profile所有相关资源, 并保存于session范围.
+    暂不以相册进行组织图片, 获取用户自己分享的全部照片
+        
+        
+    My profile: 
+        albums, joinedClubs, pendingActs, friends
+        after change profile data , and update session data
+    taProfile: 
+        get taProfile and save to session
+        change to other taProfile and update the session taProfile       
+
+issues:
+==profile: 
+点击时间轴年份没有反应
+点击时间轴不同的月份, 顶部月份没有变化. 且动态不应该显示其他月份的数据
+动态需要按日期归为一组
+已添加"加入乐学"事件, 需要修改view
+更换封面异常
+修改昵称输入框应给默认值(而非NickName)
+好友列表页: "刷新一下", "加载更多"等需要根据情况隐藏
+删除好友需要弹出警告提醒
+活动状态如: 正在进行, 已结束, ...等未实现,现无依据
+关于页面编辑资料时,是否应加一个"取消链接" ?现只有"完成"
+图片页面: 无更多图片时不应显示"加载更多图片"
+图片页面未加分页
+新注册用户默认封面不应为空
+个人动态事件中,点击个人小头像链接页面错误
+关于信息: 完成TODO项-参加了xxx活动, 共xxx个好友, 分享了xxx条信息
+
+
+==remind:
+消息弹窗考虑加一个X, 以手动关闭弹窗  --srs
+点击消息实体, 应进入相关处理/或查看页面, 如好友请求提醒,应到好友请求列表页面;评论提醒,应到评论页面查看
+自己评论自己不应有提醒
+消息列表头像应都是圆形
+
+==activity: 
+活动喜欢/参加失败应返回不同的异常信息
+活动结束时间必填, 确定?
+活动首页点击"更多"后出现"下拉选择-选1页"
+活动列表项里要添加: 喜欢/参加 ajax功能
+热门标签那里的 空label 问题
+搜索结果页面出现: 及下方的文字是否多余?
+活动详情页: "查看更多" 未做
+活动详情页: 参加/喜欢  ajax效果
+活动详情页: 参加者列表"查看更多"
+活动分享到其他第三方网站...
+
+
+
+srs issues:
+点击"全部"进入好友请求列表不合理
+
+
+
+好,值此刘斌生日之际,乐学特推出<找bug>送礼物活动.
+           
+有问题？来这里反馈。http://192.168.1.114:88/clubs/11/
+我们的韩叔叔会及时给出丰厚大礼包。
+并且有机会参观屌丝酉，赢取与其亲密合照的机会。
+机会不等人，心动就行动吧！
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

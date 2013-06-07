@@ -1,4 +1,4 @@
-
+(⊙o⊙)哦
 
 两个方面: 
 同一个人进入到他加入的不同社团, 看到的动态相关数据应该是不一样的; 
@@ -49,10 +49,46 @@ Pinterest架构发展：
     疑问与困惑
 
 
+如果是为某对象动态添加的新属性,在访问并取用该属性值时,一定要先用以下语句作一个判断, 如下:
+if hasattr(member, 'isClubLeader'):
+    doXxx()
 
 
+alter table t_club add column `member_count` integer NOT NULL;
+alter table t_club add column `last_updated` datetime NOT NULL; 
+
+工作概要:
+参与乐学产品技术架构与设计工作;
+参与服务端代码及前端部分代码编写;
+参与产品技术框架与技术选型;
+参与项目的部分敏捷开发流程推进工作, 辅助搭建一些开发环境与服务器环境;
+参与4次技术人员面试工作.
+
+====signals usage:
+# 添加"创建活动"到个人动态
+sAddEvent.send(sender=Event, owner=author, etype=Event.ACT_PUBLISH, 
+    cid=act.id, linetime=act.published_time, ctitle=act.title, 
+    cpic=act.poster)
 
 
+########################### activity related ############################
+
+def queryActivities(request, keywords):
+    '''查询活动'''
+    
+    tagId = request.REQUEST.get('tagId', '')
+    if tagId:
+        #tag = Tag.objects.getById(int(tagId))
+        tag = gdata.getTag(int(tagId))
+        
+    intervalType = request.REQUEST.get('intervalType', '')
+    if intervalType:
+        dateInterval = _getDateInterval(intervalType)
+        
+    return Activity.objects.searchActivities(keywords)
+
+
+sAddEvent.send(sender=Event, owner=author, etype=Event.ACT_PUBLISH)
 
 
 

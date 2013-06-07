@@ -107,6 +107,17 @@ school数据初始化依赖于city, 所以city数据的创建需要放在school�
 
 
 ====114 prod env 反复的 command not found: manage.py run_gunicorn 问题
-原因 :
+原因 : 环境变量问题,用了sudo来执行python manage.py run_gunicorn, sudo用户找不到对应 env
+
+===模板页面不能使用私有_unit变量
+django html模板页面不允许使用私有变量, 即带下划线的变量,如 member._unit, member._title将出错.
+    若这样的变量用在include子页面,则页面显示不会抛出任何错误.
+
+====删除实体对象后值对象id变为空
+unit.delete()
+print unit.id   ===> None
+django实体对象删除后, 对应值对象的id则变为None
+
+
 
 

@@ -1,5 +1,8 @@
 ======Django最佳实践tips:
 
+不要过多进行性能优化.
+不要过早将模块与组件划分太细, 而后期出现代码膨胀时要及时重构细分.
+
 0. SRS整理后，要进行归类，理出优先级，实现难度等
 
 1. view层：业务逻辑要尽量少，尽量只负责控制数据封装，请求转发，调用form或model
@@ -10,8 +13,6 @@ get data from session  ---when enter into the page again(initialing form or page
 clear data from session ---after used at once(like initialized)
 
 在HTML/JS中去控制是否要求登录。
-
-课题：html,js,css等的重用问题？
 
 3.django template什么时候该用extends/include?
 

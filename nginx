@@ -463,6 +463,10 @@ proxy_cache_valid 404 1h;
 
 expires 30d;设置失期时间，为30天
 
+==
+proxy_cache_valid    这个参数被用于NGINX做反向代理时，其指定特定http状态码在nginx的cache内存活的时间长短（我没用过这个参数，只是推测）。
+expires      这个参数通常用来指定被访问的文件在用户的浏览器缓存中存活的时间长短（已验证是max-age值）。
+
 ==缓存key,置于 locatioin段内:
 proxt_cache_key $host$uri$is_args$args;
 
