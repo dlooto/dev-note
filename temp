@@ -89,6 +89,22 @@ def queryActivities(request, keywords):
 
 sAddEvent.send(sender=Event, owner=author, etype=Event.ACT_PUBLISH)
 
+#    def popMember(self, member):
+#        '''将成员降为社团普通成员,即不属于任何部门, 无任何头衔'''
+#        
+#        sql = '''update t_membership set joined_unit_id='', joined_unit_name='', 
+#            assigned_title='' where club_id=%s and member_id=%s and relation=%s'''  
+#        
+#        try:    
+#            db_utils.update(sql, (self.club_id, member.id, Membership.JOINED))
+#            logger.debug('Execute SQL completed: %s' % sql)
+#            return True
+#        except Exception, e:
+#            logger.error('Execute SQL failed: %s \n %s' % (sql, e))
+#            return False   
+
+
+module circular imports Relative Imports Absolute Imports
 
 
 
