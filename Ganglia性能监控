@@ -1,0 +1,102 @@
+Ganglia系统基本包含以下三大部分。
+
+Gmond：Gmond运行在每台需要被监控的结点计算机上，它主要监控每台机器上收集和发送度量数据（如处理器速度、内存使用量等）。
+
+Gmetad：Gmetad运行在Cluster的一台主机上，作为Web Server，或者用于与Web Server进行沟通。
+
+Ganglia Web前端：Web前端用于显示Ganglia的Metrics图表.
+
+1. 准备
+安装依赖：
+sudo apt-get install rrdtool apache2 php5     ---确保apache2, php5已安装
+
+2. 安装
+安装ganglia：
+sudo apt-get install ganglia-monitor ganglia-webfront
+   --if error , run: sudo apt-get install ganglia*
+
+3. 配置
+配置ganglia服务器端：
+cd /etc/ganglia
+编辑配置文件gmond.conf：
+    globals {                   
+          ....             
+        setuid = yes
+          ....   
+    }
+
+    cluster {
+        name = "my cluster" // 这个名称很重要
+        owner = "nobody"
+        ....
+    }
+
+    udp_send_channel {
+        host = 192.168.1.5 // 使用host为单播，mcast_join为多播
+        port = 8649
+        ttl = 1
+    }
+
+    udp_recv_channel { // 如果使用单机广播，要删除“mcast_join”和“bind”
+        /* mcast_join = 239.2.11.71 */
+        port = 8649
+        /* bind = 239.2.11.71 */
+    }
+
+编辑配置文件gmetad.conf
+# 配置一个数据源，名称“heipark”要和/etc/gmond.conf中一致，后面的ip为server的ip
+    data_source "my cluster" 202.122.33.85:8651 202.122.33.85:8649 
+        --后面这些IP地址就是要监控的主机，冒号后跟的是要监听的端口号，这个端口号将在介绍客户端的配置时提到.
+
+配置ganglia客户端：
+将/etc/ganglia/gmond.conf文件拷贝到客户端/etc/ganglia/
+    scp /etc/ganglia/gmond.conf root@{ip}:/etc/ganglia/gmond.conf
+
+4. 运行
+Server端
+    service gmetad restart
+    service ganglia-monitor restart
+    service apache2 restart
+
+Client端
+    service ganglia-monitor restart
+
+5. 测试
+# 命令行打印当前活动client
+    gstat -a
+
+因为ganglia-webfront这个包默认将Web相关的代码安装在”/usr/share/ganglia-webfrontend/”路径下，
+这样apache访问不到。可以使用软链接，或者直接将目录移到”/var/www/”目录下。
+    sudo ln -s /usr/share/ganglia-webfrontend/ /var/www/ganglia
+
+# web显示当前client状态
+http://localhost/ganglia
+
+====
+telnet localhost 8649
+gmond与snmp没什么区别
+gmond监听8649端口, 响应来自gmetad的请求,发送XML格式的系统信息.
+gmond同时还进行多播,收集集群其他节点的状态, 同时发布自己的状态信息.
+gmond 给gmetad发送的xml信息中包括了其所收集的其他节点状态信息.这样一个节点死掉也不影响gmetad从其他节点获得信息.
+
+gmetad访问gmond所监听的8649端口, 获得集群系统信息.
+gmetad可以指定多个数据源, 可以是gmond或其他gmetad
+gmetad并不产生数据,只是对收集来的数据进行加工,然后提供给管理客户端
+gmetad把数据存储成RRD格式的DB文件: /var/lib/ganglia/rrds
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
