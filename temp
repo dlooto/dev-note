@@ -108,6 +108,89 @@ sAddEvent.send(sender=Event, owner=author, etype=Event.ACT_PUBLISH)
 module circular imports Relative Imports Absolute Imports
 
 
+update t_membership set joined_unit_id='',joined_unit_name='',assigned_title='' where club_id=%s and joined_unit_id=%s and relation=%s
+
+
+
+-------------------------------------------------------------------------------
+Language          files     blank   comment      code    scale   3rd gen. equiv
+-------------------------------------------------------------------------------
+Javascript          283     11484      8197     53338 x   1.48 =       78940.24
+CSS                 150      2245      1955     24077 x   1.00 =       24077.00
+HTML                201      1235       551     14057 x   1.90 =       26708.30
+Python              150      4716      2678     13930 x   4.20 =       58506.00
+Bourne Shell         11        88       199       383 x   3.81 =        1459.23
+SQL                   2        14         8        30 x   2.29 =          68.70
+-------------------------------------------------------------------------------
+SUM:                797     19782     13588    105815 x   1.79 =      189759.47
+-------------------------------------------------------------------------------
+
+insert into t_share_comment(publisher_name, publisher_pic) select name, pic from t_profile where t_share_comment.publisher_id=t_profile.id;
+
+insert into t_share_comment (publisher_name, publisher_pic) select a.name, a.pic from t_profile a, t_share_comment b where b.publisher_id=a.id;
+
+insert into a (name, pic) select b.name, b.pic from a, b where a.uid=b.id;
+
+
+update t_share_comment a left join t_profile b on a.publisher_id=b.id set
+ a.publisher_name=b.name, a.publisher_pic=b.pic;
+
+
+CREATE PROCEDURE fk_insert (p_fk INT, p_animal VARCHAR(10))
+BEGIN
+DECLARE v INT;
+BEGIN
+DECLARE EXIT HANDLER FOR SQLEXCEPTION, NOT FOUND
+SET v = 0;
+IF p_fk IS NOT NULL THEN
+SELECT 1 INTO v FROM tpk WHERE cpk = p_fk LIMIT 1;
+INSERT INTO tfk VALUES (p_fk, p_animal);
+ELSE
+SET v = 1;
+END IF;
+END;
+IF v <> 1 THEN
+DROP TABLE `The insertion failed`;
+END IF;
+END;
+
+delimiter //
+CREATE PROCEDURE p8 ()
+BEGIN
+DECLARE a INT;
+DECLARE b INT;
+SET a = 5;
+SET b = 5;
+SELECT id FROM t_profile WHERE id = 1;
+END; //
+delimiter ;
+
+http://randyboer.deviantart.com/art/Community-for-lershare-361625604   
+
+
+
+laiju@ubuntu:~/backup/conf/main$ cp ~/prod/projects/lershare-web/settings/prod.py .
+laiju@ubuntu:~/backup/conf/main$ cp /etc/nginx/nginx.conf  .
+laiju@ubuntu:~/backup/conf/main$ cp ~/prod/configs/nginx/lershare-web.conf  .
+laiju@ubuntu:~/backup/conf/main$ cp ~/prod/scripts/rungunicorn_lershare-web.sh  .
+
+
+cp ~/prod/configs/supervisord/lershare-web.conf supervisord-lershare-web.conf
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

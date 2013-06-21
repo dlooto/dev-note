@@ -180,6 +180,8 @@ lershare-web/
     def get_absolute_url()
     其他自定义方法
 
+====禁止项====
+禁止在HTML页面直接调用DB访问方法
 
 
     

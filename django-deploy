@@ -352,26 +352,33 @@ pip install -U -i $PACKAGE_URL $PACKAGE_NAME
 3.pip install fagungis  --to use fab cmd
 4.puts fabfile.py into user home(like: /home/user/, change some settings)
 
+6.确认是否有配置文件需要备份? (如果已部署过一次的话, 请对配置文件进行备份)
+
 5.fab mysite setup(in task.py), do followings:
     verify_sudo
     setup projects directories
     install and create virtualenv
     upload nginx conf/supervisorctl conf/rungunicorn script
 
-6.确认是否有配置文件需要备份? 如果已部署过一次的话
+
 7.git clone ssh://jun.xiong@192.168.1.114:29418/lershare.web.git projects/  -- cd ~/prod
 8.pip Install requirement  ---manually
 
-9.fab mysite deploy( in task.py), do followings:
+9.fab mysite deploy( in task.py),   ---this step is not required, but following need to be done 
     prepare : do manage.py syncdb/migrate/collectstatic, etc
     prepare media path
     supervisorctl restart 
 
 10. if error, modify ~/prod/scripts/rungunicorn_lershare-web.sh
 
-11. check 文件存储目录是否已创建: media/img/.../等 
-12. check lershare-engine包是否最新,否则重新打包上传
- 
+11. 检查 media/img/.../等是否已创建
+12. 检查 lershare-engine包是否最新,否则重新打包上传
+13. check DB data, modify data
+
+====After deploy, run following to check:   
+python manage.py runserver
+python manage.py run_gunicorn
+
 check nginx cache setup and related dirs (/data/nginx/cache/)
 nginx 对于静态文件 ,默认会开启缓存吗?(即不设置proxy_cache的情况下)
 

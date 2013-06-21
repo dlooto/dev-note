@@ -91,11 +91,7 @@ Review前端代码
 
 ====上线前的准备:
 技术预研任务分配
-代码重构与优化: 
-    社团管理(考虑扁平化结构存储,如字典形式存储社团的所有部门)
-    个人主页: 数据提供全局优化与代码重构, 缓存使用
-    分享列表性能优化(DB查询太多): 
-    兼: django查询优化与性能分析/mysql多表查询优化, join等分析/相关性能分析工作与手段  
+兼: django查询优化与性能分析/mysql多表查询优化, join等分析/相关性能分析工作与手段  
 
 官网服务器生产环境搭建
 高性能WEB站点再读
@@ -106,9 +102,10 @@ Nginx缓存研究
 大数据量的DB分页问题
 
 系统状态监控:IO操作/DB连接数/CPU,MEM是否过载/请求数瓶颈
+
 准备所有checklist项
-     检查account账号安全/网站GET/POST请求安全  
-    上线前对时间
+     检查account账号安全/网站GET/POST请求安全/各请求的开发权限  
+    上线前对时间: 
     check user and profile create 
     整理升级脚本
     添加flush cache item 管理页面,数据初始化是否...
@@ -116,6 +113,12 @@ Nginx缓存研究
     日志/DB访问正常/数据初始化正常/ab测试正常/...
     unittests执行正常/
 
+
+====TODO:
+nginx缓存使用
+--log-file=/home/johnson/prod/logs/projects/lershare-web_gunicorn.log    --改变该日志文件存放位置
+
+短编码大小写敏感/位数限制
 
 
 

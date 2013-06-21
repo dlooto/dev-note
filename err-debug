@@ -118,6 +118,28 @@ unit.delete()
 print unit.id   ===> None
 django实体对象删除后, 对应值对象的id则变为None
 
+====避免循环(circular imports)载入的方法之一:
+Only import the module, don't import from the module:  <----载入整个模块, 替换载入模块中的类或方法 
+如:
+    from lershare.profiles.models.shares import Share, ImageShare
+换成:
+    from lershare.profiles.models import shares
+    
+    用的地方: shares.Share, shares.ImageShare
+
+Consider a.py:
+
+    import b
+    class A:
+        def bar(self):
+            return b.B()
+
+and b.py:
+
+    import a
+    class B:
+        def bar(self):
+            return a.A()
 
 
 

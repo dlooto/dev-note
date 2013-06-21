@@ -1608,3 +1608,18 @@ ifconfig eth0 hw ether xx:xx:xx:xx:xx:xx                #更改MAC地址
 
 
 find . -type f -name "*.h" -o -name "*.m" -exec cat {} \; >all_files2.txt 
+
+
+
+====添加程序为系统服务
+此处添加gmond为系统服务
+cp ./gmond/gmond.init /etc/rc.d/init.d/gmond
+chkconfig --add gmond
+#chkconfig --list gmond
+#主要是用来查看服务状态，如果成功会显示
+#gmond         0:off   1:off   2:on    3:on    4:on    5:on    6:off
+/etc/rc.d/init.d/gmond start
+#成功会显示：
+#Starting GANGLIA gmond:   
+
+将以上代码中gmond更改为gmetad，执行相同的操作，可以将gmetad设置为启动项。

@@ -518,7 +518,7 @@ server {
 
 
     location /static/ {
-        root /home/topd/me/
+        root /home/topd/me/;
     }
 }
 

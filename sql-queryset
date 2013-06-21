@@ -1,6 +1,24 @@
 
 ====MYSQL====
 
+数据迁移: (从已有数据, )
+insert into t_profile (school_id, major) select m.school_id, m.major from t_member;
+
+====显示表上的所有约束constraints:
+select * from information_schema.table_constraints where table_name='t_member';
+
+==删除约束
+alter table t_member drop  foreign key profile_ptr_id_refs_id_1a6c8d5;
+
+==临时禁用约束检查:temporarily disable foreign key checks:
+SET FOREIGN_KEY_CHECKS=0;
+
+    --解决问题:　MYSQL: Cannot delete or update a parent row: a foreign key constraint fails
+
+==恢复约束检查:
+SET FOREIGN_KEY_CHECKS=1;
+
+
 MySQL LIMIT :
 ... LIMIT offset , rows
 offset表示偏移量（指向数据记录的游标），rows表示查询限定返回的最大记录数，这两个参数必须为整数
@@ -21,6 +39,10 @@ INNER JOIN 和 , (逗号) 在语义上是等同的
 tips:
 当你确认查询结果只有一条数据时（如核对用户名密码），可以加上LIMIT 1的限制条件，当系统查询到一条数据后即停
 止搜索而不会继续查找下一条记录，这样可有效提高查询效率。
+
+
+
+
 
 
 ====Django QuerySet:
@@ -103,6 +125,8 @@ https://docs.djangoproject.com/en/dev/topics/db/aggregation/
 he Blog model doesn’t define an entry__count attribute by itself, but by using a keyword argument to specify the aggregate function, you can control the name of the annotation:
 
 
-
+====大小写敏感查询
+Mysql 大小写敏感需将varchare 设置成 binary类型, 否则django xxx_exact大小写敏感查询无效
+alter table t_short_urls modify column short_url varchar(50) binary;
 
 
